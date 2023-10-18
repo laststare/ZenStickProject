@@ -1,18 +1,25 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using Codebase.Data;
+using Codebase.InterfaceAdapters.LevelBuilder;
+using Zenject;
 
-public class GlobalInstaller : MonoBehaviour
+namespace Codebase.Configuration.Installers
 {
-    // Start is called before the first frame update
-    void Start()
+    public class GlobalInstaller : MonoInstaller
     {
-        
-    }
+        [Inject] private ContentProvider _contentProvider;
+        public override void InstallBindings()
+        {
+            InjectLevelBuilder();
+        }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        private void InjectLevelBuilder()
+        {
+            Container.Bind<LevelBuilderViewModel>()
+                .AsSingle();
+            
+            Container.BindInterfacesAndSelfTo<LevelBuilderController>()
+                .AsSingle()
+                .NonLazy();
+        }
     }
 }
