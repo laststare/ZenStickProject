@@ -11,13 +11,23 @@ namespace Codebase.InterfaceAdapters.LevelBuilder
 
         private readonly LevelBuilderViewModel _levelBuilderViewModel;
         private readonly ContentProvider _contentProvider;
-        private readonly List<GameObject> _levelColumns = new List<GameObject>();
+        private readonly List<GameObject> _levelColumns = new ();
         
         public LevelBuilderController(LevelBuilderViewModel levelBuilderViewModel, ContentProvider contentProvider)
         {
             _levelBuilderViewModel = levelBuilderViewModel;
             _contentProvider = contentProvider;
-            _levelBuilderViewModel.startLevel.Subscribe(x => CreateFirstColumns()).AddTo(_disposables);
+            _levelBuilderViewModel.startLevel.Subscribe(CreateFirstColumns).AddTo(_disposables);
+            _levelBuilderViewModel.levelFlowState.Subscribe(x =>
+            {
+                if (x == LevelFlowState.CameraRun) NextColumn();
+            }).AddTo(_disposables);
+            _levelBuilderViewModel.columnIsReachable.Subscribe(x =>
+            {
+                if (x)
+                    RemoveOneColumn();
+            }).AddTo(_disposables);
+            
             CreateFirstColumns();
         }
         
@@ -50,6 +60,13 @@ namespace Codebase.InterfaceAdapters.LevelBuilder
             _levelBuilderViewModel.actualColumnXPosition.Value = _levelBuilderViewModel.nextColumnXPosition.Value;
             _levelBuilderViewModel.nextColumnXPosition.Value = _levelBuilderViewModel.actualColumnXPosition.Value + 5 + Random.Range(0, 4);
             AddColumn(_levelBuilderViewModel.nextColumnXPosition.Value);
+        }
+        
+        private void RemoveOneColumn()
+        {
+            if (_levelColumns.Count <= 2) return;
+            Object.Destroy(_levelColumns[0].gameObject);
+            _levelColumns.RemoveAt(0);
         }
     }
 }

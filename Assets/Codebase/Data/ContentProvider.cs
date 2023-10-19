@@ -1,4 +1,5 @@
 ﻿using System;
+using Codebase.Views;
 using UnityEngine;
 
 namespace Codebase.Data
@@ -20,9 +21,9 @@ namespace Codebase.Data
         [Serializable]
         public class UIViewsContent
         {
-            // [SerializeField] private MainMenuView mainMenuView;
+             [SerializeField] private MainMenuView mainMenuView;
             // [SerializeField] private ScoreCounterView scoreCounterView;
-            // public MainMenuView MainMenuView => mainMenuView;
+             public MainMenuView MainMenuView => mainMenuView;
             // public ScoreCounterView ScoreCounterView => scoreCounterView;
             
         }
