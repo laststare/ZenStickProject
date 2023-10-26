@@ -15,5 +15,6 @@ MonoBehaviour:
   contentProvider:
     views:
       levelcolumn: {fileID: 1658101390224254136, guid: 07fac9853a472434f99f61ad8d4a5e45, type: 3}
+      cameraView: {fileID: 2067758511643015105, guid: a52c0c12e968a41ba934997429e80eda, type: 3}
     uiViews:
       mainMenuView: {fileID: 7199328180382955996, guid: 706f9760273b642c099f22228c4049ce, type: 3}

@@ -43,5 +43,6 @@ namespace Codebase.Configuration.Installers
                 .AsSingle()
                 .NonLazy();
         }
+        
     }
 }

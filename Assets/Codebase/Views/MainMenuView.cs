@@ -9,7 +9,6 @@ namespace Codebase.Views
 {
     public class MainMenuView : ViewBase
     {
-        //[Inject] private readonly MainMenuViewModel _mainMenuViewModel;
         private MainMenuViewModel _mainMenuViewModel;
         [SerializeField] private Button startGameBtn, restartGameBtn, backStartScreenBtn;
         
