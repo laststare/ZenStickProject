@@ -1,5 +1,9 @@
 ﻿using System.Collections.Generic;
 using Codebase.Data;
+using Codebase.InterfaceAdapters.GameFlow;
+using Codebase.InterfaceAdapters.LevelBuilder;
+using Codebase.InterfaceAdapters.MainMenu;
+using Codebase.InterfaceAdapters.Player;
 using Codebase.Utilities;
 using Codebase.Views;
 using UniRx;
@@ -12,30 +16,39 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
         private readonly ContentProvider _contentProvider;
         private readonly Transform _uiRoot;
         private readonly ScoreCounterViewModel _scoreCounterViewModel;
+        private readonly GameFlowViewModel _gameFlowViewModel;
+        private readonly PlayerViewModel _playerViewModel;
+        private readonly LevelBuilderViewModel _levelBuilderViewModel;
+        private readonly MainMenuViewModel _mainMenuViewModel;
         private ScoreCounterView _view;
         private int _currentScore, _bestScore;
         private readonly List<RewardView> _spawnedRewardViews = new();
 
-        public ScoreCounterController(ContentProvider contentProvider, Transform uiRoot, ScoreCounterViewModel scoreCounterViewModel)
+        public ScoreCounterController(ContentProvider contentProvider, Transform uiRoot, ScoreCounterViewModel scoreCounterViewModel, 
+            GameFlowViewModel gameFlowViewModel, PlayerViewModel playerViewModel, LevelBuilderViewModel levelBuilderViewModel, MainMenuViewModel mainMenuViewModel)
         {
             _contentProvider = contentProvider;
             _uiRoot = uiRoot;
             _scoreCounterViewModel = scoreCounterViewModel;
-            _scoreCounterViewModel.startGame.Subscribe(GetSavedScore).AddTo(_disposables);
-            _scoreCounterViewModel.finishLevel.Subscribe(() =>
+            _gameFlowViewModel = gameFlowViewModel;
+            _playerViewModel = playerViewModel;
+            _levelBuilderViewModel = levelBuilderViewModel;
+            _mainMenuViewModel = mainMenuViewModel;
+            _gameFlowViewModel.startGame.Subscribe(GetSavedScore).AddTo(_disposables);
+            _gameFlowViewModel.finishLevel.Subscribe(() =>
             {
                 UpdateBestScore();
                 SendScoreToView();
                 ClearScore();
                 DestroyRewardView();
             }).AddTo(_disposables);
-            _scoreCounterViewModel.columnIsReachable.Subscribe(x =>
+            
+            _playerViewModel.columnIsReachable.Subscribe(x =>
             {
                 if (!x) return;
                 UpdateScore();
                 RemoveOneView();
             }).AddTo(_disposables);
-            
             _scoreCounterViewModel.spawnRewardView.Subscribe(CreateRewardView).AddTo(_disposables);
             
             CreateView();
@@ -44,13 +57,13 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
         private void CreateView()
         {
             _view = Object.Instantiate(_contentProvider.UIViews.ScoreCounterView, _uiRoot);
-            _view.Init(_scoreCounterViewModel);
+            _view.Init(_scoreCounterViewModel, _gameFlowViewModel, _mainMenuViewModel);
         }
         
         private void CreateRewardView()
         {
             var rewardView = Object.Instantiate(_contentProvider.Views.RewardView,
-                new Vector3(_scoreCounterViewModel.nextColumnXPosition.Value, Constant.PlayerYPosition, 0), Quaternion.identity);
+                new Vector3(_levelBuilderViewModel.nextColumnXPosition.Value, Constant.PlayerYPosition, 0), Quaternion.identity);
             _spawnedRewardViews.Add(rewardView);
         }
         

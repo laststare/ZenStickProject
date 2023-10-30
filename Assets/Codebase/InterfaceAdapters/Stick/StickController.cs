@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
 using Codebase.Data;
+using Codebase.InterfaceAdapters.GameFlow;
+using Codebase.InterfaceAdapters.LevelBuilder;
+using Codebase.InterfaceAdapters.Player;
 using Codebase.Utilities;
 using UniRx;
 using UnityEngine;
@@ -10,35 +13,43 @@ namespace Codebase.InterfaceAdapters.Stick
     {
         private readonly StickViewModel _stickViewModel;
         private readonly ContentProvider _contentProvider;
+        private readonly GameFlowViewModel _gameFlowViewModel;
+        private readonly PlayerViewModel _playerViewModel;
+        private readonly LevelBuilderViewModel _levelBuilderViewModel;
         private CompositeDisposable _clickHandlers;
         private readonly List<GameObject> _spawnedSticks = new List<GameObject>();
 
-        public StickController(ContentProvider contentProvider, StickViewModel stickViewModel)
+        public StickController(ContentProvider contentProvider, StickViewModel stickViewModel, GameFlowViewModel gameFlowViewModel, 
+            PlayerViewModel playerViewModel, LevelBuilderViewModel levelBuilderViewModel)
         {
             _contentProvider = contentProvider;
             _stickViewModel = stickViewModel;
-            _stickViewModel.levelFlowState.Subscribe(x =>
+            _gameFlowViewModel = gameFlowViewModel;
+            _playerViewModel = playerViewModel;
+            _levelBuilderViewModel = levelBuilderViewModel;
+            _gameFlowViewModel.levelFlowState.Subscribe(x =>
             {
                 if (x == LevelFlowState.PlayerIdle) TmpClickDownSubscription();
             }).AddTo(_disposables);
 
-            _stickViewModel.startLevel.Subscribe(DestroySticks).AddTo(_disposables);
-            _stickViewModel.stickIsDown.Subscribe(() =>
-                _stickViewModel.changeLevelFlowState.Notify(LevelFlowState.PlayerRun)).AddTo(_disposables);
-            _stickViewModel.columnIsReachable.Subscribe(x =>
+            _gameFlowViewModel.startLevel.Subscribe(DestroySticks).AddTo(_disposables);
+            _stickViewModel.stickIsDown.Subscribe(
+                () =>
+                _gameFlowViewModel.changeLevelFlowState.Notify(LevelFlowState.PlayerRun))
+                .AddTo(_disposables);
+            _playerViewModel.columnIsReachable.Subscribe(x =>
             {
                 if (x)
                     RemoveOneView();
             }).AddTo(_disposables);
-            _stickViewModel.createView.Subscribe(CreateView).AddTo(_disposables);
         }
 
         private void CreateView()
         {
             var view = Object.Instantiate(_contentProvider.Views.StickView,
-                new Vector2(_stickViewModel.actualColumnXPosition.Value + 1, Constant.PlayerYPosition - 0.5f),
+                new Vector2(_levelBuilderViewModel.actualColumnXPosition.Value + 1, Constant.PlayerYPosition - 0.5f),
                 Quaternion.identity);
-            view.Init(_stickViewModel);
+            view.Init(_stickViewModel, _gameFlowViewModel);
             _spawnedSticks.Add(view.gameObject);
         }
 
@@ -50,7 +61,7 @@ namespace Codebase.InterfaceAdapters.Stick
                 .Where(_ => Input.GetMouseButtonDown(0)).Subscribe(
                     (_) =>
                     {
-                        _stickViewModel.createView.Notify();
+                        CreateView();
                         GrowStickUp();
                         TmpClickUpSubscription();
                     }).AddTo(_clickHandlers);
@@ -70,13 +81,13 @@ namespace Codebase.InterfaceAdapters.Stick
 
         private void GrowStickUp()
         {
-            _stickViewModel.changeLevelFlowState.Notify(LevelFlowState.StickGrowsUp);
+            _gameFlowViewModel.changeLevelFlowState.Notify(LevelFlowState.StickGrowsUp);
             _stickViewModel.startStickGrow.Notify();
         }
         
         private void RotateStick()
         {
-            _stickViewModel.changeLevelFlowState.Notify(LevelFlowState.StickFalls);
+            _gameFlowViewModel.changeLevelFlowState.Notify(LevelFlowState.StickFalls);
             _stickViewModel.startStickRotation.Notify();
         }
         

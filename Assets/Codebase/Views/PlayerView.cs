@@ -1,4 +1,5 @@
-﻿using Codebase.InterfaceAdapters.Player;
+﻿using Codebase.InterfaceAdapters.GameFlow;
+using Codebase.InterfaceAdapters.Player;
 using Codebase.Utilities;
 using DG.Tweening;
 using UniRx;
@@ -9,10 +10,12 @@ namespace Codebase.Views
     public class PlayerView : ViewBase
     {
         private PlayerViewModel _playerViewModel;
-        public void Init(PlayerViewModel playerViewModel)
+        private GameFlowViewModel _gameFlowViewModel;
+        public void Init(PlayerViewModel playerViewModel, GameFlowViewModel gameFlowViewModel)
         {
             _playerViewModel = playerViewModel;
-            _playerViewModel.startLevel.Subscribe(() =>
+            _gameFlowViewModel = gameFlowViewModel;
+            _gameFlowViewModel.startLevel.Subscribe(() =>
             {
                 transform.position = new Vector2( Constant.PlayerOnColumnXOffset, Constant.PlayerYPosition);
                 gameObject.SetActive(true);

@@ -1,4 +1,7 @@
 ﻿using Codebase.Data;
+using Codebase.InterfaceAdapters.GameFlow;
+using Codebase.InterfaceAdapters.LevelBuilder;
+using Codebase.InterfaceAdapters.Stick;
 using Codebase.Utilities;
 using Codebase.Views;
 using UniRx;
@@ -10,13 +13,20 @@ namespace Codebase.InterfaceAdapters.Player
     {
         private readonly PlayerViewModel _playerViewModel;
         private readonly ContentProvider _contentProvider;
+        private readonly GameFlowViewModel _gameFlowViewModel;
+        private readonly LevelBuilderViewModel _levelBuilderViewModel;
+        private readonly StickViewModel _stickViewModel;
         private PlayerView _view;
         
-        public PlayerController(ContentProvider contentProvider, PlayerViewModel playerViewModel)
+        public PlayerController(ContentProvider contentProvider, PlayerViewModel playerViewModel, 
+            GameFlowViewModel gameFlowViewMode, LevelBuilderViewModel levelBuilderViewModel, StickViewModel stickViewModel)
         {
             _contentProvider = contentProvider;
             _playerViewModel = playerViewModel;
-            _playerViewModel.levelFlowState.Subscribe(x =>
+            _gameFlowViewModel = gameFlowViewMode;
+            _levelBuilderViewModel = levelBuilderViewModel;
+            _stickViewModel = stickViewModel;
+            _gameFlowViewModel.levelFlowState.Subscribe(x =>
             {
                 if (x == LevelFlowState.PlayerRun)
                     SetPlayerDestinationPoint();
@@ -28,16 +38,16 @@ namespace Codebase.InterfaceAdapters.Player
         private void CreateView()
         {
             _view = Object.Instantiate(_contentProvider.Views.PlayerView);
-            _view.Init(_playerViewModel);
+            _view.Init(_playerViewModel, _gameFlowViewModel);
         }
         
         private void SetPlayerDestinationPoint()
         {
-            var moveDistance = _playerViewModel.actualColumnXPosition.Value + 1 + _playerViewModel.stickLength.Value;
-            _playerViewModel.columnIsReachable.SetValueAndForceNotify(moveDistance >= _playerViewModel.nextColumnXPosition.Value - 1.25f &&
-                                                                      moveDistance <= _playerViewModel.nextColumnXPosition.Value + 1.25f);
+            var moveDistance = _levelBuilderViewModel.actualColumnXPosition.Value + 1 + _stickViewModel.stickLength.Value;
+            _playerViewModel.columnIsReachable.SetValueAndForceNotify(moveDistance >= _levelBuilderViewModel.nextColumnXPosition.Value - 1.25f &&
+                                                                      moveDistance <= _levelBuilderViewModel.nextColumnXPosition.Value + 1.25f);
             var playerDestination = _playerViewModel.columnIsReachable.Value
-                ? _playerViewModel.nextColumnXPosition.Value + Constant.PlayerOnColumnXOffset
+                ? _levelBuilderViewModel.nextColumnXPosition.Value + Constant.PlayerOnColumnXOffset
                 : moveDistance;
             _playerViewModel.movePlayerTo.Notify(playerDestination);
         }
@@ -45,9 +55,9 @@ namespace Codebase.InterfaceAdapters.Player
         private void PlayerOnNextColumn()
         {
             if (_playerViewModel.columnIsReachable.Value)
-                _playerViewModel.changeLevelFlowState.Notify(LevelFlowState.CameraRun);
+                _gameFlowViewModel.changeLevelFlowState.Notify(LevelFlowState.CameraRun);
             else 
-                _playerViewModel.finishLevel.Notify();
+                _gameFlowViewModel.finishLevel.Notify();
         }
     }
 }

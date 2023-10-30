@@ -1,4 +1,5 @@
 ﻿using Codebase.Data;
+using Codebase.InterfaceAdapters.GameFlow;
 using Codebase.Utilities;
 using Codebase.Views;
 using UniRx;
@@ -11,13 +12,15 @@ namespace Codebase.InterfaceAdapters.MainMenu
         private readonly ContentProvider _contentProvider;
         private readonly Transform _uiRoot;
         private readonly MainMenuViewModel _mainMenuViewModel;
+        private readonly GameFlowViewModel _gameFlowViewModel;
         private MainMenuView _view;
         
-        public MainMenuController(ContentProvider contentProvider, Transform uiRoot, MainMenuViewModel mainMenuViewModel)
+        public MainMenuController(ContentProvider contentProvider, Transform uiRoot, MainMenuViewModel mainMenuViewModel, GameFlowViewModel gameFlowViewModel)
         {
             _contentProvider = contentProvider;
             _uiRoot = uiRoot;
             _mainMenuViewModel = mainMenuViewModel;
+            _gameFlowViewModel = gameFlowViewModel;
             _mainMenuViewModel.menuButtonClicked.SubscribeWithSkip(ButtonClickReceiver).AddTo(_disposables);
             CrateView();
         }
@@ -25,7 +28,7 @@ namespace Codebase.InterfaceAdapters.MainMenu
         private void CrateView()
         {
             _view = Object.Instantiate(_contentProvider.UIViews.MainMenuView, _uiRoot);
-            _view.Init(_mainMenuViewModel);
+            _view.Init(_mainMenuViewModel, _gameFlowViewModel);
         }
         
         private void ButtonClickReceiver(MainMenuButton button)
@@ -39,7 +42,7 @@ namespace Codebase.InterfaceAdapters.MainMenu
                     StartLevel();
                     break;
                 case MainMenuButton.BackToStartScreen:
-                   // _ctx.showStartMenu.Notify();
+                    _mainMenuViewModel.showStartMenu.Notify();
                     break;
             }
         }
@@ -47,7 +50,7 @@ namespace Codebase.InterfaceAdapters.MainMenu
         private void StartLevel()
         {
             Debug.Log("level started");
-           // _ctx.startLevel.Notify();
+            _gameFlowViewModel.startLevel.Notify();
         }
     }
 }

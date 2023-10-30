@@ -1,4 +1,5 @@
-﻿using Codebase.InterfaceAdapters.MainMenu;
+﻿using Codebase.InterfaceAdapters.GameFlow;
+using Codebase.InterfaceAdapters.MainMenu;
 using Codebase.Utilities;
 using UniRx;
 using UnityEngine;
@@ -10,19 +11,22 @@ namespace Codebase.Views
     public class MainMenuView : ViewBase
     {
         private MainMenuViewModel _mainMenuViewModel;
+        private GameFlowViewModel _gameFlowViewModel;
         [SerializeField] private Button startGameBtn, restartGameBtn, backStartScreenBtn;
         
-        public void Init(MainMenuViewModel mainMenuViewModel)
+        public void Init(MainMenuViewModel mainMenuViewModel, GameFlowViewModel gameFlowViewModel)
         {
             _mainMenuViewModel = mainMenuViewModel;
-            _mainMenuViewModel.startGame.Subscribe(() => startGameBtn.gameObject.SetActive(true)).AddTo(this);
-
-            _mainMenuViewModel.finishLevel.Subscribe(ShowFinishScreen).AddTo(this);
-
-            _mainMenuViewModel.startLevel.Subscribe(() => { 
+            _gameFlowViewModel = gameFlowViewModel;
+            _gameFlowViewModel.startGame.Subscribe(() => startGameBtn.gameObject.SetActive(true)).AddTo(this);
+            
+            _gameFlowViewModel.startLevel.Subscribe(() => { 
                 HideStartScreen();
                 HideFinishScreen();
             });
+            
+            _gameFlowViewModel.finishLevel.Subscribe(ShowFinishScreen).AddTo(this);
+            
             
             startGameBtn.onClick.AddListener(() =>
             {

@@ -9,5 +9,6 @@ namespace Codebase.InterfaceAdapters.GameFlow
         public ReactiveEvent<LevelFlowState> changeLevelFlowState { get; } = new();
         public ReactiveTrigger startLevel { get; set; } = new();
         public ReactiveTrigger startGame { get; set; } = new();
+        public ReactiveTrigger finishLevel { get; set; } = new();
     }
 }

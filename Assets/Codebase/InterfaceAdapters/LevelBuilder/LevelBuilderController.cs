@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using Codebase.Data;
+using Codebase.InterfaceAdapters.GameFlow;
+using Codebase.InterfaceAdapters.Player;
 using Codebase.Utilities;
 using UniRx;
 using UnityEngine;
@@ -11,24 +13,26 @@ namespace Codebase.InterfaceAdapters.LevelBuilder
 
         private readonly LevelBuilderViewModel _levelBuilderViewModel;
         private readonly ContentProvider _contentProvider;
+        private readonly GameFlowViewModel _gameFlowViewModel;
+        private readonly PlayerViewModel _playerViewModel;
         private readonly List<GameObject> _levelColumns = new ();
         
-        public LevelBuilderController(LevelBuilderViewModel levelBuilderViewModel, ContentProvider contentProvider)
+        public LevelBuilderController(LevelBuilderViewModel levelBuilderViewModel, ContentProvider contentProvider, GameFlowViewModel gameFlowViewModel, PlayerViewModel playerViewModel)
         {
             _levelBuilderViewModel = levelBuilderViewModel;
             _contentProvider = contentProvider;
-            _levelBuilderViewModel.startLevel.Subscribe(CreateFirstColumns).AddTo(_disposables);
-            _levelBuilderViewModel.levelFlowState.Subscribe(x =>
+            _gameFlowViewModel = gameFlowViewModel;
+            _playerViewModel = playerViewModel;
+            _gameFlowViewModel.startLevel.Subscribe(CreateFirstColumns).AddTo(_disposables);
+            _gameFlowViewModel.levelFlowState.Subscribe(x =>
             {
                 if (x == LevelFlowState.CameraRun) NextColumn();
             }).AddTo(_disposables);
-            _levelBuilderViewModel.columnIsReachable.Subscribe(x =>
+            _playerViewModel.columnIsReachable.Subscribe(x =>
             {
                 if (x)
                     RemoveOneColumn();
             }).AddTo(_disposables);
-            
-            CreateFirstColumns();
         }
         
         private void CreateFirstColumns()

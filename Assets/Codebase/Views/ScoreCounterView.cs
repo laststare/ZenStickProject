@@ -1,4 +1,6 @@
-﻿using Codebase.InterfaceAdapters.ScoreCounter;
+﻿using Codebase.InterfaceAdapters.GameFlow;
+using Codebase.InterfaceAdapters.MainMenu;
+using Codebase.InterfaceAdapters.ScoreCounter;
 using Codebase.Utilities;
 using TMPro;
 using UniRx;
@@ -9,20 +11,25 @@ namespace Codebase.Views
     public class ScoreCounterView : ViewBase
     {
         private ScoreCounterViewModel _scoreCounterViewModel;
+        private GameFlowViewModel _gameFlowViewModel;
+        private MainMenuViewModel _mainMenuViewModel;
         [SerializeField] private TMP_Text bestScoreText, actualScoreText;
 
-        public void Init(ScoreCounterViewModel scoreCounterViewModel)
+        public void Init(ScoreCounterViewModel scoreCounterViewModel, GameFlowViewModel gameFlowViewModel, MainMenuViewModel mainMenuViewModel)
         {
             _scoreCounterViewModel = scoreCounterViewModel;
+            _gameFlowViewModel = gameFlowViewModel;
+            _mainMenuViewModel = mainMenuViewModel;
             _scoreCounterViewModel.showScore.SubscribeWithSkip(ShowScore).AddTo(this);
-            _scoreCounterViewModel.startLevel.Subscribe(HideAll).AddTo(this);
-            _scoreCounterViewModel.finishLevel.Subscribe(ShowFinish).AddTo(this);
-            _scoreCounterViewModel.startGame.Subscribe(ShowStart).AddTo(this);
-            _scoreCounterViewModel.showStartMenu.Subscribe(() =>
+            _mainMenuViewModel.showStartMenu.Subscribe(() =>
             {
                 HideAll();
                 ShowStart();
             }).AddTo(this);
+            _gameFlowViewModel.startGame.Subscribe(ShowStart).AddTo(this);
+            _gameFlowViewModel .startLevel.Subscribe(HideAll).AddTo(this);
+            _gameFlowViewModel.finishLevel.Subscribe(ShowFinish).AddTo(this);
+
         }
 
         private void ShowScore(string best, string actual)
