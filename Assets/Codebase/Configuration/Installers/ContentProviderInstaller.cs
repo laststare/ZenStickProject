@@ -8,6 +8,6 @@ public class ContentProviderInstaller : ScriptableObjectInstaller<ContentProvide
     public ContentProvider contentProvider;
     public override void InstallBindings()
     {
-        Container.BindInterfacesAndSelfTo<ContentProvider>().FromInstance(contentProvider).AsSingle();
+        Container.BindInterfacesAndSelfTo<IContentProvider>().FromInstance(contentProvider).AsSingle();
     }
 }

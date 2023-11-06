@@ -12,12 +12,12 @@ namespace Codebase.InterfaceAdapters.LevelBuilder
     {
 
         private readonly LevelBuilderViewModel _levelBuilderViewModel;
-        private readonly ContentProvider _contentProvider;
+        private readonly IContentProvider _contentProvider;
         private readonly GameFlowViewModel _gameFlowViewModel;
         private readonly PlayerViewModel _playerViewModel;
         private readonly List<GameObject> _levelColumns = new ();
         
-        public LevelBuilderController(LevelBuilderViewModel levelBuilderViewModel, ContentProvider contentProvider, GameFlowViewModel gameFlowViewModel, PlayerViewModel playerViewModel)
+        public LevelBuilderController(LevelBuilderViewModel levelBuilderViewModel, IContentProvider contentProvider, GameFlowViewModel gameFlowViewModel, PlayerViewModel playerViewModel)
         {
             _levelBuilderViewModel = levelBuilderViewModel;
             _contentProvider = contentProvider;
@@ -53,7 +53,7 @@ namespace Codebase.InterfaceAdapters.LevelBuilder
         
         private void AddColumn(float xPosition)
         {
-            var column = Object.Instantiate(_contentProvider.Views.Levelcolumn,
+            var column = Object.Instantiate(_contentProvider.LevelColumn(),
                 new Vector3(xPosition, 0, 0),
                 Quaternion.identity);
             _levelColumns.Add(column); 

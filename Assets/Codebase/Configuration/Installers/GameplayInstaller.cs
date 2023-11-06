@@ -12,7 +12,7 @@ namespace Codebase.Configuration.Installers
     public class GameplayInstaller : MonoInstaller<GameplayInstaller>
     {
         [SerializeField] private Transform uiRoot;
-        [Inject] private ContentProvider _contentProvider;
+        [Inject] private IContentProvider _contentProvider;
         public override void InstallBindings()
         {
             InjectGameFlow();

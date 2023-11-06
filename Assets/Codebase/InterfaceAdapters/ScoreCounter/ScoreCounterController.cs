@@ -13,7 +13,7 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
 {
     public class ScoreCounterController : DisposableBase
     {
-        private readonly ContentProvider _contentProvider;
+        private readonly IContentProvider _contentProvider;
         private readonly Transform _uiRoot;
         private readonly ScoreCounterViewModel _scoreCounterViewModel;
         private readonly GameFlowViewModel _gameFlowViewModel;
@@ -24,7 +24,7 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
         private int _currentScore, _bestScore;
         private readonly List<RewardView> _spawnedRewardViews = new();
 
-        public ScoreCounterController(ContentProvider contentProvider, Transform uiRoot, ScoreCounterViewModel scoreCounterViewModel, 
+        public ScoreCounterController(IContentProvider contentProvider, Transform uiRoot, ScoreCounterViewModel scoreCounterViewModel, 
             GameFlowViewModel gameFlowViewModel, PlayerViewModel playerViewModel, LevelBuilderViewModel levelBuilderViewModel, MainMenuViewModel mainMenuViewModel)
         {
             _contentProvider = contentProvider;
@@ -56,13 +56,13 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
 
         private void CreateView()
         {
-            _view = Object.Instantiate(_contentProvider.UIViews.ScoreCounterView, _uiRoot);
+            _view = Object.Instantiate(_contentProvider.ScoreCounterView(), _uiRoot);
             _view.Init(_scoreCounterViewModel, _gameFlowViewModel, _mainMenuViewModel);
         }
         
         private void CreateRewardView()
         {
-            var rewardView = Object.Instantiate(_contentProvider.Views.RewardView,
+            var rewardView = Object.Instantiate(_contentProvider.RewardView(),
                 new Vector3(_levelBuilderViewModel.nextColumnXPosition.Value, Constant.PlayerYPosition, 0), Quaternion.identity);
             _spawnedRewardViews.Add(rewardView);
         }
@@ -83,7 +83,7 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
 
         private void UpdateScore()
         {
-            _currentScore += _contentProvider.Settings.RewardConfig.OneColumnReward;
+            _currentScore += _contentProvider.RewardConfig().OneColumnReward;
             _scoreCounterViewModel.spawnRewardView.Notify();
         }
 

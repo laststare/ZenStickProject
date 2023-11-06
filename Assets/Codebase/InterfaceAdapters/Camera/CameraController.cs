@@ -10,13 +10,13 @@ namespace Codebase.InterfaceAdapters.Camera
 {
     public class CameraController : DisposableBase
     {
-        private readonly ContentProvider _contentProvider;
+        private readonly IContentProvider _contentProvider;
         private readonly CameraViewModel _cameraViewModel;
         private readonly GameFlowViewModel _gameFlowViewModel;
         private readonly LevelBuilderViewModel _levelBuilderViewModel;
         private CameraView _view;
         
-        public CameraController(ContentProvider contentProvider, CameraViewModel cameraViewModel,
+        public CameraController(IContentProvider contentProvider, CameraViewModel cameraViewModel,
             GameFlowViewModel gameFlowViewModel, LevelBuilderViewModel levelBuilderViewModel)
         {
             _contentProvider = contentProvider;
@@ -39,7 +39,7 @@ namespace Codebase.InterfaceAdapters.Camera
         
         private void CreateCameraView()
         {
-            _view = Object.Instantiate(_contentProvider.Views.CameraView);
+            _view = Object.Instantiate(_contentProvider.CameraView());
             _view.Init(_cameraViewModel, _gameFlowViewModel);
         }
         

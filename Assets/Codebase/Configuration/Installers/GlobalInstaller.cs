@@ -9,7 +9,7 @@ namespace Codebase.Configuration.Installers
     public class GlobalInstaller : MonoInstaller
     {
         [SerializeField] private Transform uiRoot;
-        [Inject] private ContentProvider _contentProvider;
+        [Inject] private IContentProvider _contentProvider;
         public override void InstallBindings()
         {
             CreateUIRoot();

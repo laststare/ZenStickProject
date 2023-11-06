@@ -9,13 +9,13 @@ namespace Codebase.InterfaceAdapters.MainMenu
 {
     public class MainMenuController : DisposableBase
     {
-        private readonly ContentProvider _contentProvider;
+        private readonly IContentProvider _contentProvider;
         private readonly Transform _uiRoot;
         private readonly MainMenuViewModel _mainMenuViewModel;
         private readonly GameFlowViewModel _gameFlowViewModel;
         private MainMenuView _view;
         
-        public MainMenuController(ContentProvider contentProvider, Transform uiRoot, MainMenuViewModel mainMenuViewModel, GameFlowViewModel gameFlowViewModel)
+        public MainMenuController(IContentProvider contentProvider, Transform uiRoot, MainMenuViewModel mainMenuViewModel, GameFlowViewModel gameFlowViewModel)
         {
             _contentProvider = contentProvider;
             _uiRoot = uiRoot;
@@ -27,7 +27,7 @@ namespace Codebase.InterfaceAdapters.MainMenu
         
         private void CrateView()
         {
-            _view = Object.Instantiate(_contentProvider.UIViews.MainMenuView, _uiRoot);
+            _view = Object.Instantiate(_contentProvider.MainMenuView(), _uiRoot);
             _view.Init(_mainMenuViewModel, _gameFlowViewModel);
         }
         

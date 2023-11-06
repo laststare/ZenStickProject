@@ -12,13 +12,13 @@ namespace Codebase.InterfaceAdapters.Player
     public class PlayerController : DisposableBase
     {
         private readonly PlayerViewModel _playerViewModel;
-        private readonly ContentProvider _contentProvider;
+        private readonly IContentProvider _contentProvider;
         private readonly GameFlowViewModel _gameFlowViewModel;
         private readonly LevelBuilderViewModel _levelBuilderViewModel;
         private readonly StickViewModel _stickViewModel;
         private PlayerView _view;
         
-        public PlayerController(ContentProvider contentProvider, PlayerViewModel playerViewModel, 
+        public PlayerController(IContentProvider contentProvider, PlayerViewModel playerViewModel, 
             GameFlowViewModel gameFlowViewMode, LevelBuilderViewModel levelBuilderViewModel, StickViewModel stickViewModel)
         {
             _contentProvider = contentProvider;
@@ -37,7 +37,7 @@ namespace Codebase.InterfaceAdapters.Player
         
         private void CreateView()
         {
-            _view = Object.Instantiate(_contentProvider.Views.PlayerView);
+            _view = Object.Instantiate(_contentProvider.PlayerView());
             _view.Init(_playerViewModel, _gameFlowViewModel);
         }
         

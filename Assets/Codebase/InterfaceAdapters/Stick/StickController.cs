@@ -12,14 +12,14 @@ namespace Codebase.InterfaceAdapters.Stick
     public class StickController : DisposableBase
     {
         private readonly StickViewModel _stickViewModel;
-        private readonly ContentProvider _contentProvider;
+        private readonly IContentProvider _contentProvider;
         private readonly GameFlowViewModel _gameFlowViewModel;
         private readonly PlayerViewModel _playerViewModel;
         private readonly LevelBuilderViewModel _levelBuilderViewModel;
         private CompositeDisposable _clickHandlers;
         private readonly List<GameObject> _spawnedSticks = new List<GameObject>();
 
-        public StickController(ContentProvider contentProvider, StickViewModel stickViewModel, GameFlowViewModel gameFlowViewModel, 
+        public StickController(IContentProvider contentProvider, StickViewModel stickViewModel, GameFlowViewModel gameFlowViewModel, 
             PlayerViewModel playerViewModel, LevelBuilderViewModel levelBuilderViewModel)
         {
             _contentProvider = contentProvider;
@@ -46,7 +46,7 @@ namespace Codebase.InterfaceAdapters.Stick
 
         private void CreateView()
         {
-            var view = Object.Instantiate(_contentProvider.Views.StickView,
+            var view = Object.Instantiate(_contentProvider.StickView(),
                 new Vector2(_levelBuilderViewModel.actualColumnXPosition.Value + 1, Constant.PlayerYPosition - 0.5f),
                 Quaternion.identity);
             view.Init(_stickViewModel, _gameFlowViewModel);
