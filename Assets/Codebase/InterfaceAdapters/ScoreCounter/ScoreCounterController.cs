@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Codebase.Data;
+using Codebase.InterfaceAdapters.DataSave;
 using Codebase.InterfaceAdapters.GameFlow;
 using Codebase.InterfaceAdapters.LevelBuilder;
 using Codebase.InterfaceAdapters.MainMenu;
@@ -14,6 +15,7 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
     public class ScoreCounterController : DisposableBase
     {
         private readonly IContentProvider _contentProvider;
+        private readonly IDataSave _dataSave;
         private readonly Transform _uiRoot;
         private readonly ScoreCounterViewModel _scoreCounterViewModel;
         private readonly GameFlowViewModel _gameFlowViewModel;
@@ -24,10 +26,11 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
         private int _currentScore, _bestScore;
         private readonly List<RewardView> _spawnedRewardViews = new();
 
-        public ScoreCounterController(IContentProvider contentProvider, Transform uiRoot, ScoreCounterViewModel scoreCounterViewModel, 
+        public ScoreCounterController(IContentProvider contentProvider, IDataSave dataSave, Transform uiRoot, ScoreCounterViewModel scoreCounterViewModel, 
             GameFlowViewModel gameFlowViewModel, PlayerViewModel playerViewModel, LevelBuilderViewModel levelBuilderViewModel, MainMenuViewModel mainMenuViewModel)
         {
             _contentProvider = contentProvider;
+            _dataSave = dataSave;
             _uiRoot = uiRoot;
             _scoreCounterViewModel = scoreCounterViewModel;
             _gameFlowViewModel = gameFlowViewModel;
@@ -35,6 +38,7 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
             _levelBuilderViewModel = levelBuilderViewModel;
             _mainMenuViewModel = mainMenuViewModel;
             _gameFlowViewModel.startGame.Subscribe(GetSavedScore).AddTo(_disposables);
+            
             _gameFlowViewModel.finishLevel.Subscribe(() =>
             {
                 UpdateBestScore();
@@ -67,10 +71,9 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
             _spawnedRewardViews.Add(rewardView);
         }
         
-
         private void GetSavedScore()
         {
-            _bestScore = PlayerPrefs.GetInt(Constant.SavedScore);
+            _bestScore = _dataSave.LoadBestScore();
             SendScoreToView();
         }
 
@@ -92,7 +95,7 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
             if (_currentScore <= _bestScore)
                 return;
             _bestScore = _currentScore;
-            PlayerPrefs.SetInt(Constant.SavedScore, _bestScore);
+            _dataSave.SaveBestScore(_bestScore);
         }
 
         private void DestroyRewardView()

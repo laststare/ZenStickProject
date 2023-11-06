@@ -5,8 +5,8 @@ namespace Codebase.InterfaceAdapters.Player
 {
     public class PlayerViewModel
     {
-        public ReactiveEvent<float> movePlayerTo { get; set; } = new();
-        public ReactiveTrigger playerFinishMoving { get; } = new();
-        public ReactiveProperty<bool> columnIsReachable { get; set; } = new();
+        public ReactiveEvent<float> movePlayerTo = new();
+        public ReactiveTrigger playerFinishMoving  = new();
+        public ReactiveProperty<bool> columnIsReachable  = new();
     }
 }

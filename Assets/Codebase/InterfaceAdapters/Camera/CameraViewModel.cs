@@ -5,7 +5,7 @@ namespace Codebase.InterfaceAdapters.Camera
 {
     public class CameraViewModel
     {
-        public ReactiveEvent<float> moveCameraToNextColumn { get; set; } = new();
-        public ReactiveTrigger cameraFinishMoving { get; set; } = new();
+        public ReactiveEvent<float> moveCameraToNextColumn = new();
+        public ReactiveTrigger cameraFinishMoving = new();
     }
 }

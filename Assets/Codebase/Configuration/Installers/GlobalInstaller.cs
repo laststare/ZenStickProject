@@ -1,4 +1,5 @@
 using Codebase.Data;
+using Codebase.InterfaceAdapters.DataSave;
 using Codebase.InterfaceAdapters.LevelBuilder;
 using Codebase.InterfaceAdapters.MainMenu;
 using UnityEngine;
@@ -15,6 +16,7 @@ namespace Codebase.Configuration.Installers
             CreateUIRoot();
             InjectLevelBuilder();
             InjectMainMenu();
+            InjectDataSave();
         }
 
         private void CreateUIRoot()
@@ -40,6 +42,13 @@ namespace Codebase.Configuration.Installers
                 .AsSingle();
             
             Container.BindInterfacesAndSelfTo<MainMenuController>()
+                .AsSingle()
+                .NonLazy();
+        }
+        
+        private void InjectDataSave()
+        {
+            Container.BindInterfacesAndSelfTo<DataSaveController>()
                 .AsSingle()
                 .NonLazy();
         }

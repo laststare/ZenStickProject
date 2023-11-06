@@ -1,15 +1,13 @@
-﻿using Codebase.Data;
-using External.Reactive;
+﻿using External.Reactive;
 using UniRx;
-using UnityEngine;
 
 namespace Codebase.InterfaceAdapters.Stick
 {
     public class StickViewModel
     {
-        public ReactiveProperty<float> stickLength { get; set; } = new();
-        public ReactiveTrigger stickIsDown { get; set; } = new();
-        public ReactiveTrigger startStickGrow { get; } = new();
-        public ReactiveTrigger startStickRotation { get; } = new();
+        public ReactiveProperty<float> stickLength = new();
+        public ReactiveTrigger stickIsDown = new();
+        public ReactiveTrigger startStickGrow = new();
+        public ReactiveTrigger startStickRotation = new();
     }
 }
