@@ -4,8 +4,7 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
 {
     public class ScoreCounterViewModel
     {
-        public ReactiveTrigger spawnRewardView = new();
-        public ReactiveEvent<string, string> showScore = new();
-        public ReactiveTrigger showStartMenu  { get; set; }
+        public readonly ReactiveTrigger SpawnRewardView = new();
+        public readonly ReactiveEvent<string, string> ShowScore = new();
     }
 }

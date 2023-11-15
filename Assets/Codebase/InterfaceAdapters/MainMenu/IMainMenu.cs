@@ -4,6 +4,6 @@ namespace Codebase.InterfaceAdapters.MainMenu
 {
     public interface IMainMenu
     {
-        public ReactiveTrigger showStartMenu  { get; set; }
+        public ReactiveTrigger ShowStartMenu  { get; set; }
     }
 }

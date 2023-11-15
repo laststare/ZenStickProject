@@ -4,41 +4,38 @@ using Codebase.Utilities;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
-using Zenject;
 
 namespace Codebase.Views
 {
     public class MainMenuView : ViewBase
     {
-        private MainMenuViewModel _mainMenuViewModel;
         [SerializeField] private Button startGameBtn, restartGameBtn, backStartScreenBtn;
         
-        public void Init(MainMenuViewModel mainMenuViewModel)
+        public void Init(MainMenuViewModel mainMenuViewModel, IGameFlow iGameFlow)
         {
-            _mainMenuViewModel = mainMenuViewModel;
-            _mainMenuViewModel.startGame.Subscribe(() => startGameBtn.gameObject.SetActive(true)).AddTo(this);
+            iGameFlow.StartGame.Subscribe(() => startGameBtn.gameObject.SetActive(true)).AddTo(this);
             
-            _mainMenuViewModel.startLevel.Subscribe(() => { 
+            iGameFlow.StartLevel.Subscribe(() => { 
                 HideStartScreen();
                 HideFinishScreen();
             });
             
-            _mainMenuViewModel.finishLevel.Subscribe(ShowFinishScreen).AddTo(this);
+            iGameFlow.FinishLevel.Subscribe(ShowFinishScreen).AddTo(this);
             
             
             startGameBtn.onClick.AddListener(() =>
             {
-                _mainMenuViewModel.menuButtonClicked.Notify(MainMenuButton.StartGame);
+                mainMenuViewModel.MenuButtonClicked.Notify(MainMenuButton.StartGame);
             });
             
             restartGameBtn.onClick.AddListener(() =>
             {
-                _mainMenuViewModel.menuButtonClicked.Notify(MainMenuButton.RestartGame);
+                mainMenuViewModel.MenuButtonClicked.Notify(MainMenuButton.RestartGame);
             });
             
             backStartScreenBtn.onClick.AddListener(() =>
             {
-                _mainMenuViewModel.menuButtonClicked.Notify(MainMenuButton.BackToStartScreen);
+                mainMenuViewModel.MenuButtonClicked.Notify(MainMenuButton.BackToStartScreen);
                 ShowStartScreen();
             });
         }

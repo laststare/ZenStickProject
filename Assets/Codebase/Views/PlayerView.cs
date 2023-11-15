@@ -9,20 +9,17 @@ namespace Codebase.Views
 {
     public class PlayerView : ViewBase
     {
-        private PlayerViewModel _playerViewModel;
-        public void Init(PlayerViewModel playerViewModel)
+        public void Init(PlayerViewModel playerViewModel, IGameFlow iGameFlow)
         {
-            _playerViewModel = playerViewModel;
-            
-            _playerViewModel.startLevel.Subscribe(() =>
+            iGameFlow.StartLevel.Subscribe(() =>
             {
                 transform.position = new Vector2( Constant.PlayerOnColumnXOffset, Constant.PlayerYPosition);
                 gameObject.SetActive(true);
             }).AddTo(this);
 
-            _playerViewModel.movePlayerTo.SubscribeWithSkip(x => transform.DOMoveX(x, 2).OnComplete(() =>
+            playerViewModel.MovePlayerTo.SubscribeWithSkip(x => transform.DOMoveX(x, 2).OnComplete(() =>
             {
-                _playerViewModel.playerFinishMoving.Notify();
+                playerViewModel.PlayerFinishMoving.Notify();
             })).AddTo(this);
         }
         

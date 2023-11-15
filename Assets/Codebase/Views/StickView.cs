@@ -11,33 +11,37 @@ namespace Codebase.Views
     public class StickView : ViewBase
     {
         private StickViewModel _stickViewModel;
+        private IGameFlow _iGameFlow;
         private CompositeDisposable _disposables;
+        private IStick _iStick;
 
-        public void Init(StickViewModel stickViewModel)
+        public void Init(StickViewModel stickViewModel, IGameFlow iGameFlow, IStick iStick)
         {
             _stickViewModel = stickViewModel;
+            _iGameFlow = iGameFlow;
+            _iStick = iStick;
             _disposables = new CompositeDisposable();
-            _stickViewModel.startStickGrow.Subscribe(GrowStickUp).AddTo(_disposables);
-            _stickViewModel.startStickRotation.Subscribe(RotateStick).AddTo(_disposables);
+            _stickViewModel.StartStickGrow.Subscribe(GrowStickUp).AddTo(_disposables);
+            _stickViewModel.StartStickRotation.Subscribe(RotateStick).AddTo(_disposables);
         }   
         
         private async void GrowStickUp()
         {
             var stickHeight = 0f;
             var stickWidth = transform.localScale.x;
-            while (_stickViewModel.levelFlowState.Value == LevelFlowState.StickGrowsUp)
+            while (_iGameFlow.LevelFlowState.Value == LevelFlowState.StickGrowsUp)
             {
                 stickHeight += Time.deltaTime * 6;
                 transform.localScale = new Vector3(stickWidth, stickHeight, 1);
                 await UniTask.Yield();
             }
-            _stickViewModel.stickLength.Value = stickHeight;
+            _iStick.StickLength.Value = stickHeight;
         }
         
         private void RotateStick()
         {
             transform.DORotate(new Vector3(0, 0, -90f), 0.5f)
-                .OnComplete(() => _stickViewModel.stickIsDown.Notify());
+                .OnComplete(() => _stickViewModel.StickIsDown.Notify());
             _disposables.Dispose();
         }
         

@@ -9,19 +9,15 @@ namespace Codebase.Views
 {
     public class CameraView : ViewBase
     {
-        private CameraViewModel _cameraViewModel;
-
-        public void Init(CameraViewModel cameraViewModel)
+        public void Init(CameraViewModel cameraViewModel, IGameFlow iGameFlow)
         {
-            _cameraViewModel = cameraViewModel;
-            
-            _cameraViewModel.moveCameraToNextColumn.SubscribeWithSkip(x => 
+            cameraViewModel.MoveCameraToNextColumn.SubscribeWithSkip(x => 
                 transform.DOMoveX(x, 1).OnComplete(() =>
             {
-                _cameraViewModel.cameraFinishMoving.Notify();
+                cameraViewModel.CameraFinishMoving.Notify();
             })).AddTo(this);
 
-            _cameraViewModel.startLevel.Subscribe(() =>
+            iGameFlow.StartLevel.Subscribe(() =>
             {
                 transform.position = new Vector3(Constant.CameraOnColumnXOffset, transform.position.y,
                     transform.position.z);

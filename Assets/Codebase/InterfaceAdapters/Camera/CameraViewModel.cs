@@ -1,12 +1,10 @@
 ﻿using External.Reactive;
-using UniRx;
 
 namespace Codebase.InterfaceAdapters.Camera
 {
     public class CameraViewModel
     {
-        public ReactiveEvent<float> moveCameraToNextColumn = new();
-        public ReactiveTrigger cameraFinishMoving = new();
-        public ReactiveTrigger startLevel { get; set; }
+        public readonly ReactiveEvent<float> MoveCameraToNextColumn = new();
+        public readonly ReactiveTrigger CameraFinishMoving = new();
     }
 }

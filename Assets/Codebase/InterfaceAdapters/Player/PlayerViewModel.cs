@@ -1,15 +1,10 @@
 ﻿using External.Reactive;
-using UniRx;
 
 namespace Codebase.InterfaceAdapters.Player
 {
     public class PlayerViewModel
     {
-        public ReactiveEvent<float> movePlayerTo = new();
-        public ReactiveTrigger playerFinishMoving  = new();
-        public ReactiveProperty<bool> columnIsReachable  = new();
-        public ReactiveTrigger startLevel { get; set; }
-
-
+        public readonly ReactiveEvent<float> MovePlayerTo = new();
+        public readonly ReactiveTrigger PlayerFinishMoving  = new();
     }
 }

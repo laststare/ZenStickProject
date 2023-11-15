@@ -15,28 +15,25 @@ namespace Codebase.InterfaceAdapters.MainMenu
         private readonly MainMenuViewModel _mainMenuViewModel;
         private readonly IGameFlow _iGameFlow;
         private MainMenuView _view;
-        public ReactiveTrigger showStartMenu { get; set; }
+        public ReactiveTrigger ShowStartMenu { get; set; }
 
         protected MainMenuController(IContentProvider contentProvider, Transform uiRoot, IGameFlow iGameFlow, MainMenuViewModel mainMenuViewModel)
         {
-            showStartMenu = new ReactiveTrigger();
+            ShowStartMenu = new ReactiveTrigger();
             _contentProvider = contentProvider;
             _uiRoot = uiRoot;
 
             _mainMenuViewModel = mainMenuViewModel;
-            _mainMenuViewModel.startLevel = iGameFlow.startLevel;
-            _mainMenuViewModel.finishLevel = iGameFlow.finishLevel;
-            _mainMenuViewModel.startGame = iGameFlow.startGame;
-            
+
             _iGameFlow = iGameFlow;
-            _mainMenuViewModel.menuButtonClicked.SubscribeWithSkip(ButtonClickReceiver).AddTo(_disposables);
+            _mainMenuViewModel.MenuButtonClicked.SubscribeWithSkip(ButtonClickReceiver).AddTo(_disposables);
             CrateView();
         }
         
         private void CrateView()
         {
             _view = Object.Instantiate(_contentProvider.MainMenuView(), _uiRoot);
-            _view.Init(_mainMenuViewModel);
+            _view.Init(_mainMenuViewModel, _iGameFlow);
         }
         
         private void ButtonClickReceiver(MainMenuButton button)
@@ -50,15 +47,14 @@ namespace Codebase.InterfaceAdapters.MainMenu
                     StartLevel();
                     break;
                 case MainMenuButton.BackToStartScreen:
-                    showStartMenu.Notify();
+                    ShowStartMenu.Notify();
                     break;
             }
         }
 
         private void StartLevel()
         {
-            Debug.Log("level started");
-            _iGameFlow.startLevel.Notify();
+            _iGameFlow.StartLevel.Notify();
         }
 
      

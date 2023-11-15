@@ -23,18 +23,16 @@ namespace Codebase.InterfaceAdapters.Camera
             _cameraViewModel = cameraViewModel;
             _iGameFlow = iGameFlow;
             _iLevelBuilder = iLevelBuilder;
-
-            _cameraViewModel.startLevel = _iGameFlow.startLevel;
             
-            _iGameFlow.levelFlowState.Subscribe(x =>
+            _iGameFlow.LevelFlowState.Subscribe(x =>
             {
                 if (x == LevelFlowState.CameraRun)
                     SetCameraDestinationPointToColumn();
             }).AddTo(_disposables);
             
-            _cameraViewModel.cameraFinishMoving.Subscribe(() =>
+            _cameraViewModel.CameraFinishMoving.Subscribe(() =>
             {
-                _iGameFlow.changeLevelFlowState.Notify(LevelFlowState.PlayerIdle);
+                _iGameFlow.ChangeLevelFlowState.Notify(LevelFlowState.PlayerIdle);
             }).AddTo(_disposables);
             CreateCameraView();
         }
@@ -42,13 +40,13 @@ namespace Codebase.InterfaceAdapters.Camera
         private void CreateCameraView()
         {
             _view = Object.Instantiate(_contentProvider.CameraView());
-            _view.Init(_cameraViewModel);
+            _view.Init(_cameraViewModel, _iGameFlow);
         }
         
         private void SetCameraDestinationPointToColumn()
         {
-            _cameraViewModel.moveCameraToNextColumn.Notify(
-                _iLevelBuilder.actualColumnXPosition + Constant.CameraOnColumnXOffset);
+            _cameraViewModel.MoveCameraToNextColumn.Notify(
+                _iLevelBuilder.ActualColumnXPosition + Constant.CameraOnColumnXOffset);
         }
         
     }

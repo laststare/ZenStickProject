@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Codebase.Data;
 using Codebase.InterfaceAdapters.GameFlow;
-using Codebase.InterfaceAdapters.Player;
 using Codebase.Utilities;
 using UniRx;
 using UnityEngine;
@@ -11,26 +10,21 @@ namespace Codebase.InterfaceAdapters.LevelBuilder
     public class LevelBuilderController : DisposableBase, ILevelBuilder
     {
         private readonly IContentProvider _contentProvider;
-        private readonly IGameFlow _iGameFlow;
-        private readonly IPlayer _iPlayer;
         private readonly List<GameObject> _levelColumns = new ();
-        public float actualColumnXPosition { get; set; }
-        public float nextColumnXPosition { get; set; }
+        public float ActualColumnXPosition { get; set; }
+        public float NextColumnXPosition { get; set; }
 
-        protected LevelBuilderController(IContentProvider contentProvider, 
-            IPlayer iPlayer, IGameFlow iGameFlow)
+        protected LevelBuilderController(IContentProvider contentProvider, IGameFlow iGameFlow)
         {
             _contentProvider = contentProvider;
-            _iGameFlow = iGameFlow;
-            _iPlayer = iPlayer;
             
-            _iGameFlow.startLevel.Subscribe(CreateFirstColumns).AddTo(_disposables);
-            _iGameFlow.levelFlowState.Subscribe(x =>
+            iGameFlow.StartLevel.Subscribe(CreateFirstColumns).AddTo(_disposables);
+            iGameFlow.LevelFlowState.Subscribe(x =>
             {
                 if (x == LevelFlowState.CameraRun) NextColumn();
             }).AddTo(_disposables);
             
-            _iPlayer.columnIsReachable.Subscribe(x =>
+            iGameFlow.ColumnIsReachable.Subscribe(x =>
             {
                 if (x)
                     RemoveOneColumn();
@@ -49,8 +43,8 @@ namespace Codebase.InterfaceAdapters.LevelBuilder
             foreach (var column in _levelColumns) 
                 Object.Destroy(column);
             _levelColumns.Clear();
-            actualColumnXPosition = 0;
-            nextColumnXPosition = 0;
+            ActualColumnXPosition = 0;
+            NextColumnXPosition = 0;
         }
         
         private void AddColumn(float xPosition)
@@ -63,9 +57,9 @@ namespace Codebase.InterfaceAdapters.LevelBuilder
         
         private void NextColumn()
         { 
-            actualColumnXPosition= nextColumnXPosition;
-            nextColumnXPosition = actualColumnXPosition + 5 + Random.Range(0, 4);
-            AddColumn(nextColumnXPosition);
+            ActualColumnXPosition= NextColumnXPosition;
+            NextColumnXPosition = ActualColumnXPosition + 5 + Random.Range(0, 4);
+            AddColumn(NextColumnXPosition);
         }
         
         private void RemoveOneColumn()

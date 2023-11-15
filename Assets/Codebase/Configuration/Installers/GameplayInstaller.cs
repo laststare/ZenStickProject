@@ -1,18 +1,14 @@
-﻿using Codebase.Data;
-using Codebase.InterfaceAdapters.Camera;
+﻿using Codebase.InterfaceAdapters.Camera;
 using Codebase.InterfaceAdapters.GameFlow;
 using Codebase.InterfaceAdapters.Player;
 using Codebase.InterfaceAdapters.ScoreCounter;
 using Codebase.InterfaceAdapters.Stick;
-using UnityEngine;
 using Zenject;
 
 namespace Codebase.Configuration.Installers
 {
     public class GameplayInstaller : MonoInstaller<GameplayInstaller>
     {
-        [SerializeField] private Transform uiRoot;
-        [Inject] private IContentProvider _contentProvider;
         public override void InstallBindings()
         {
             InjectGameFlow();
@@ -25,8 +21,8 @@ namespace Codebase.Configuration.Installers
         private void InjectGameFlow()
         {
             Container.BindInterfacesAndSelfTo<GameFlowController>()
-                .AsSingle()
-                .NonLazy();
+                 .AsSingle()
+                 .NonLazy();
         }
 
         private void InjectCamera()
@@ -54,9 +50,10 @@ namespace Codebase.Configuration.Installers
             Container.Bind<PlayerViewModel>()
                 .AsSingle();
             
-            Container.BindInterfacesAndSelfTo<PlayerController>()
+            Container.Bind<PlayerController>()
                 .AsSingle()
                 .NonLazy();
+            
         }
         
         private void InjectStick()

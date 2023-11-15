@@ -5,10 +5,11 @@ namespace Codebase.InterfaceAdapters.GameFlow
 {
     public interface IGameFlow
     {
-        ReactiveProperty<LevelFlowState> levelFlowState { get; set; }
-        ReactiveEvent<LevelFlowState> changeLevelFlowState { get; set; }
-        ReactiveTrigger startLevel { get; set; }
-        ReactiveTrigger startGame { get; set; }
-        ReactiveTrigger finishLevel { get; set; }
+        ReactiveProperty<LevelFlowState> LevelFlowState { get; set; }
+        ReactiveEvent<LevelFlowState> ChangeLevelFlowState { get; set; }
+        ReactiveProperty<bool> ColumnIsReachable { get; set; }
+        ReactiveTrigger StartLevel { get; set; }
+        ReactiveTrigger StartGame { get; set; }
+        ReactiveTrigger FinishLevel { get; set; }
     }
 }
