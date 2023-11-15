@@ -8,27 +8,29 @@ using UnityEngine;
 
 namespace Codebase.InterfaceAdapters.LevelBuilder
 {
-    public class LevelBuilderController : DisposableBase
+    public class LevelBuilderController : DisposableBase, ILevelBuilder
     {
-
-        private readonly LevelBuilderViewModel _levelBuilderViewModel;
         private readonly IContentProvider _contentProvider;
-        private readonly GameFlowViewModel _gameFlowViewModel;
-        private readonly PlayerViewModel _playerViewModel;
+        private readonly IGameFlow _iGameFlow;
+        private readonly IPlayer _iPlayer;
         private readonly List<GameObject> _levelColumns = new ();
-        
-        public LevelBuilderController(LevelBuilderViewModel levelBuilderViewModel, IContentProvider contentProvider, GameFlowViewModel gameFlowViewModel, PlayerViewModel playerViewModel)
+        public float actualColumnXPosition { get; set; }
+        public float nextColumnXPosition { get; set; }
+
+        protected LevelBuilderController(IContentProvider contentProvider, 
+            IPlayer iPlayer, IGameFlow iGameFlow)
         {
-            _levelBuilderViewModel = levelBuilderViewModel;
             _contentProvider = contentProvider;
-            _gameFlowViewModel = gameFlowViewModel;
-            _playerViewModel = playerViewModel;
-            _gameFlowViewModel.startLevel.Subscribe(CreateFirstColumns).AddTo(_disposables);
-            _gameFlowViewModel.levelFlowState.Subscribe(x =>
+            _iGameFlow = iGameFlow;
+            _iPlayer = iPlayer;
+            
+            _iGameFlow.startLevel.Subscribe(CreateFirstColumns).AddTo(_disposables);
+            _iGameFlow.levelFlowState.Subscribe(x =>
             {
                 if (x == LevelFlowState.CameraRun) NextColumn();
             }).AddTo(_disposables);
-            _playerViewModel.columnIsReachable.Subscribe(x =>
+            
+            _iPlayer.columnIsReachable.Subscribe(x =>
             {
                 if (x)
                     RemoveOneColumn();
@@ -47,8 +49,8 @@ namespace Codebase.InterfaceAdapters.LevelBuilder
             foreach (var column in _levelColumns) 
                 Object.Destroy(column);
             _levelColumns.Clear();
-            _levelBuilderViewModel.actualColumnXPosition.Value = 0;
-            _levelBuilderViewModel.nextColumnXPosition.Value = 0;
+            actualColumnXPosition = 0;
+            nextColumnXPosition = 0;
         }
         
         private void AddColumn(float xPosition)
@@ -60,10 +62,10 @@ namespace Codebase.InterfaceAdapters.LevelBuilder
         }
         
         private void NextColumn()
-        {
-            _levelBuilderViewModel.actualColumnXPosition.Value = _levelBuilderViewModel.nextColumnXPosition.Value;
-            _levelBuilderViewModel.nextColumnXPosition.Value = _levelBuilderViewModel.actualColumnXPosition.Value + 5 + Random.Range(0, 4);
-            AddColumn(_levelBuilderViewModel.nextColumnXPosition.Value);
+        { 
+            actualColumnXPosition= nextColumnXPosition;
+            nextColumnXPosition = actualColumnXPosition + 5 + Random.Range(0, 4);
+            AddColumn(nextColumnXPosition);
         }
         
         private void RemoveOneColumn()
@@ -72,5 +74,6 @@ namespace Codebase.InterfaceAdapters.LevelBuilder
             Object.Destroy(_levelColumns[0].gameObject);
             _levelColumns.RemoveAt(0);
         }
+        
     }
 }

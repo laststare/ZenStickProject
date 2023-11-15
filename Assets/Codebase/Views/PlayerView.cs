@@ -10,12 +10,11 @@ namespace Codebase.Views
     public class PlayerView : ViewBase
     {
         private PlayerViewModel _playerViewModel;
-        private GameFlowViewModel _gameFlowViewModel;
-        public void Init(PlayerViewModel playerViewModel, GameFlowViewModel gameFlowViewModel)
+        public void Init(PlayerViewModel playerViewModel)
         {
             _playerViewModel = playerViewModel;
-            _gameFlowViewModel = gameFlowViewModel;
-            _gameFlowViewModel.startLevel.Subscribe(() =>
+            
+            _playerViewModel.startLevel.Subscribe(() =>
             {
                 transform.position = new Vector2( Constant.PlayerOnColumnXOffset, Constant.PlayerYPosition);
                 gameObject.SetActive(true);

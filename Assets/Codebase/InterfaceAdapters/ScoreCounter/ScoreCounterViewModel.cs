@@ -1,8 +1,4 @@
-﻿using Codebase.Data;
-using Codebase.Views;
-using External.Reactive;
-using UniRx;
-using UnityEngine;
+﻿using External.Reactive;
 
 namespace Codebase.InterfaceAdapters.ScoreCounter
 {
@@ -10,5 +6,6 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
     {
         public ReactiveTrigger spawnRewardView = new();
         public ReactiveEvent<string, string> showScore = new();
+        public ReactiveTrigger showStartMenu  { get; set; }
     }
 }

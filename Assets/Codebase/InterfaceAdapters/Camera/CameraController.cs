@@ -11,20 +11,22 @@ namespace Codebase.InterfaceAdapters.Camera
     public class CameraController : DisposableBase
     {
         private readonly IContentProvider _contentProvider;
+        private readonly IGameFlow _iGameFlow;
+        private readonly ILevelBuilder _iLevelBuilder;
         private readonly CameraViewModel _cameraViewModel;
-        private readonly GameFlowViewModel _gameFlowViewModel;
-        private readonly LevelBuilderViewModel _levelBuilderViewModel;
         private CameraView _view;
         
         public CameraController(IContentProvider contentProvider, CameraViewModel cameraViewModel,
-            GameFlowViewModel gameFlowViewModel, LevelBuilderViewModel levelBuilderViewModel)
+            IGameFlow iGameFlow, ILevelBuilder iLevelBuilder)
         {
             _contentProvider = contentProvider;
             _cameraViewModel = cameraViewModel;
-            _gameFlowViewModel = gameFlowViewModel;
-            _levelBuilderViewModel = levelBuilderViewModel;
+            _iGameFlow = iGameFlow;
+            _iLevelBuilder = iLevelBuilder;
 
-            _gameFlowViewModel.levelFlowState.Subscribe(x =>
+            _cameraViewModel.startLevel = _iGameFlow.startLevel;
+            
+            _iGameFlow.levelFlowState.Subscribe(x =>
             {
                 if (x == LevelFlowState.CameraRun)
                     SetCameraDestinationPointToColumn();
@@ -32,7 +34,7 @@ namespace Codebase.InterfaceAdapters.Camera
             
             _cameraViewModel.cameraFinishMoving.Subscribe(() =>
             {
-                _gameFlowViewModel.changeLevelFlowState.Notify(LevelFlowState.PlayerIdle);
+                _iGameFlow.changeLevelFlowState.Notify(LevelFlowState.PlayerIdle);
             }).AddTo(_disposables);
             CreateCameraView();
         }
@@ -40,13 +42,13 @@ namespace Codebase.InterfaceAdapters.Camera
         private void CreateCameraView()
         {
             _view = Object.Instantiate(_contentProvider.CameraView());
-            _view.Init(_cameraViewModel, _gameFlowViewModel);
+            _view.Init(_cameraViewModel);
         }
         
         private void SetCameraDestinationPointToColumn()
         {
             _cameraViewModel.moveCameraToNextColumn.Notify(
-                _levelBuilderViewModel.actualColumnXPosition.Value + Constant.CameraOnColumnXOffset);
+                _iLevelBuilder.actualColumnXPosition + Constant.CameraOnColumnXOffset);
         }
         
     }

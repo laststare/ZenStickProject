@@ -8,5 +8,8 @@ namespace Codebase.InterfaceAdapters.Player
         public ReactiveEvent<float> movePlayerTo = new();
         public ReactiveTrigger playerFinishMoving  = new();
         public ReactiveProperty<bool> columnIsReachable  = new();
+        public ReactiveTrigger startLevel { get; set; }
+
+
     }
 }

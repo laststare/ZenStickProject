@@ -24,9 +24,6 @@ namespace Codebase.Configuration.Installers
         
         private void InjectGameFlow()
         {
-            Container.Bind<GameFlowViewModel>()
-                .AsSingle();
-
             Container.BindInterfacesAndSelfTo<GameFlowController>()
                 .AsSingle()
                 .NonLazy();

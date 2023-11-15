@@ -11,13 +11,11 @@ namespace Codebase.Views
     public class StickView : ViewBase
     {
         private StickViewModel _stickViewModel;
-        private GameFlowViewModel _gameFlowViewModel;
         private CompositeDisposable _disposables;
 
-        public void Init(StickViewModel stickViewModel, GameFlowViewModel gameFlowViewModel)
+        public void Init(StickViewModel stickViewModel)
         {
             _stickViewModel = stickViewModel;
-            _gameFlowViewModel = gameFlowViewModel;
             _disposables = new CompositeDisposable();
             _stickViewModel.startStickGrow.Subscribe(GrowStickUp).AddTo(_disposables);
             _stickViewModel.startStickRotation.Subscribe(RotateStick).AddTo(_disposables);
@@ -27,7 +25,7 @@ namespace Codebase.Views
         {
             var stickHeight = 0f;
             var stickWidth = transform.localScale.x;
-            while (_gameFlowViewModel.levelFlowState.Value == LevelFlowState.StickGrowsUp)
+            while (_stickViewModel.levelFlowState.Value == LevelFlowState.StickGrowsUp)
             {
                 stickHeight += Time.deltaTime * 6;
                 transform.localScale = new Vector3(stickWidth, stickHeight, 1);

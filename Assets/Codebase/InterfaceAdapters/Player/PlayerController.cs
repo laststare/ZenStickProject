@@ -4,50 +4,66 @@ using Codebase.InterfaceAdapters.LevelBuilder;
 using Codebase.InterfaceAdapters.Stick;
 using Codebase.Utilities;
 using Codebase.Views;
+using External.Reactive;
 using UniRx;
 using UnityEngine;
 
 namespace Codebase.InterfaceAdapters.Player
 {
-    public class PlayerController : DisposableBase
+    public class PlayerController : DisposableBase, IPlayer
     {
         private readonly PlayerViewModel _playerViewModel;
         private readonly IContentProvider _contentProvider;
-        private readonly GameFlowViewModel _gameFlowViewModel;
-        private readonly LevelBuilderViewModel _levelBuilderViewModel;
-        private readonly StickViewModel _stickViewModel;
+        private readonly IGameFlow _iGameFlow;
+        private readonly ILevelBuilder _iLevelBuilder;
+        private readonly IStick _iStick;
         private PlayerView _view;
+        public ReactiveEvent<float> movePlayerTo { get; set; }
+        public ReactiveTrigger playerFinishMoving { get; set; }
+        public ReactiveProperty<bool> columnIsReachable { get; set; }
         
-        public PlayerController(IContentProvider contentProvider, PlayerViewModel playerViewModel, 
-            GameFlowViewModel gameFlowViewMode, LevelBuilderViewModel levelBuilderViewModel, StickViewModel stickViewModel)
+        public PlayerController(IContentProvider contentProvider, 
+            IGameFlow iGameFlow, 
+            IStick iStick, 
+            ILevelBuilder iLevelBuilder, 
+            PlayerViewModel playerViewModel)
         {
+            movePlayerTo = new ReactiveEvent<float>();
+            playerFinishMoving = new ReactiveTrigger();
+            columnIsReachable = new ReactiveProperty<bool>();
+            
             _contentProvider = contentProvider;
             _playerViewModel = playerViewModel;
-            _gameFlowViewModel = gameFlowViewMode;
-            _levelBuilderViewModel = levelBuilderViewModel;
-            _stickViewModel = stickViewModel;
-            _gameFlowViewModel.levelFlowState.Subscribe(x =>
+            _iLevelBuilder = iLevelBuilder;
+            _iStick = iStick;
+            _iGameFlow = iGameFlow;
+            
+            _playerViewModel.startLevel = _iGameFlow.startLevel;
+            
+            _iGameFlow.levelFlowState.Subscribe(x =>
             {
                 if (x == LevelFlowState.PlayerRun)
                     SetPlayerDestinationPoint();
             }).AddTo(_disposables);
+            
             _playerViewModel.playerFinishMoving.Subscribe(PlayerOnNextColumn).AddTo(_disposables);
+            
             CreateView();
         }
         
         private void CreateView()
         {
             _view = Object.Instantiate(_contentProvider.PlayerView());
-            _view.Init(_playerViewModel, _gameFlowViewModel);
+            _view.Init(_playerViewModel);
         }
         
         private void SetPlayerDestinationPoint()
         {
-            var moveDistance = _levelBuilderViewModel.actualColumnXPosition.Value + 1 + _stickViewModel.stickLength.Value;
-            _playerViewModel.columnIsReachable.SetValueAndForceNotify(moveDistance >= _levelBuilderViewModel.nextColumnXPosition.Value - 1.25f &&
-                                                                      moveDistance <= _levelBuilderViewModel.nextColumnXPosition.Value + 1.25f);
+            var moveDistance = _iLevelBuilder.actualColumnXPosition + 1 +  _iStick.stickLength.Value;
+            _playerViewModel.columnIsReachable.SetValueAndForceNotify(moveDistance >= _iLevelBuilder.nextColumnXPosition - 1.25f &&
+                                                                      moveDistance <= _iLevelBuilder.nextColumnXPosition + 1.25f);
             var playerDestination = _playerViewModel.columnIsReachable.Value
-                ? _levelBuilderViewModel.nextColumnXPosition.Value + Constant.PlayerOnColumnXOffset
+                ? _iLevelBuilder.nextColumnXPosition + Constant.PlayerOnColumnXOffset
                 : moveDistance;
             _playerViewModel.movePlayerTo.Notify(playerDestination);
         }
@@ -55,9 +71,10 @@ namespace Codebase.InterfaceAdapters.Player
         private void PlayerOnNextColumn()
         {
             if (_playerViewModel.columnIsReachable.Value)
-                _gameFlowViewModel.changeLevelFlowState.Notify(LevelFlowState.CameraRun);
+                _iGameFlow.changeLevelFlowState.Notify(LevelFlowState.CameraRun);
             else 
-                _gameFlowViewModel.finishLevel.Notify();
+                _iGameFlow.finishLevel.Notify();
         }
+        
     }
 }

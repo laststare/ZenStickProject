@@ -9,5 +9,6 @@ namespace Codebase.InterfaceAdapters.Stick
         public ReactiveTrigger stickIsDown = new();
         public ReactiveTrigger startStickGrow = new();
         public ReactiveTrigger startStickRotation = new();
+        public ReactiveProperty<LevelFlowState> levelFlowState { get; set; }
     }
 }

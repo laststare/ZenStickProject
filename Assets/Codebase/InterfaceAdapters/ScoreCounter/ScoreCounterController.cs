@@ -16,30 +16,32 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
     {
         private readonly IContentProvider _contentProvider;
         private readonly IDataSave _dataSave;
+        private readonly IGameFlow _iGameFlow;
+        private readonly IPlayer _iPlayer;
+        private readonly ILevelBuilder _iLevelBuilder;
+        private readonly IMainMenu _iMainMenu;
         private readonly Transform _uiRoot;
         private readonly ScoreCounterViewModel _scoreCounterViewModel;
-        private readonly GameFlowViewModel _gameFlowViewModel;
-        private readonly PlayerViewModel _playerViewModel;
-        private readonly LevelBuilderViewModel _levelBuilderViewModel;
-        private readonly MainMenuViewModel _mainMenuViewModel;
+        
         private ScoreCounterView _view;
         private int _currentScore, _bestScore;
         private readonly List<RewardView> _spawnedRewardViews = new();
 
         public ScoreCounterController(IContentProvider contentProvider, IDataSave dataSave, Transform uiRoot, ScoreCounterViewModel scoreCounterViewModel, 
-            GameFlowViewModel gameFlowViewModel, PlayerViewModel playerViewModel, LevelBuilderViewModel levelBuilderViewModel, MainMenuViewModel mainMenuViewModel)
+            IGameFlow iGameFlow, IPlayer iPlayer, ILevelBuilder iLevelBuilder, IMainMenu iMainMenu)
         {
             _contentProvider = contentProvider;
             _dataSave = dataSave;
             _uiRoot = uiRoot;
             _scoreCounterViewModel = scoreCounterViewModel;
-            _gameFlowViewModel = gameFlowViewModel;
-            _playerViewModel = playerViewModel;
-            _levelBuilderViewModel = levelBuilderViewModel;
-            _mainMenuViewModel = mainMenuViewModel;
-            _gameFlowViewModel.startGame.Subscribe(GetSavedScore).AddTo(_disposables);
+            _iGameFlow = iGameFlow;
+            _iPlayer = iPlayer;
+            _iLevelBuilder = iLevelBuilder;
+            _iMainMenu = iMainMenu;
+            _scoreCounterViewModel.showStartMenu = _iMainMenu.showStartMenu;
+            _iGameFlow.startGame.Subscribe(GetSavedScore).AddTo(_disposables);
             
-            _gameFlowViewModel.finishLevel.Subscribe(() =>
+            _iGameFlow.finishLevel.Subscribe(() =>
             {
                 UpdateBestScore();
                 SendScoreToView();
@@ -47,7 +49,7 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
                 DestroyRewardView();
             }).AddTo(_disposables);
             
-            _playerViewModel.columnIsReachable.Subscribe(x =>
+            _iPlayer.columnIsReachable.Subscribe(x =>
             {
                 if (!x) return;
                 UpdateScore();
@@ -61,13 +63,13 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
         private void CreateView()
         {
             _view = Object.Instantiate(_contentProvider.ScoreCounterView(), _uiRoot);
-            _view.Init(_scoreCounterViewModel, _gameFlowViewModel, _mainMenuViewModel);
+            _view.Init(_scoreCounterViewModel);
         }
         
         private void CreateRewardView()
         {
             var rewardView = Object.Instantiate(_contentProvider.RewardView(),
-                new Vector3(_levelBuilderViewModel.nextColumnXPosition.Value, Constant.PlayerYPosition, 0), Quaternion.identity);
+                new Vector3(_iLevelBuilder.nextColumnXPosition, Constant.PlayerYPosition, 0), Quaternion.identity);
             _spawnedRewardViews.Add(rewardView);
         }
         

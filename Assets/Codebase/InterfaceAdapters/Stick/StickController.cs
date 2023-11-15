@@ -4,40 +4,56 @@ using Codebase.InterfaceAdapters.GameFlow;
 using Codebase.InterfaceAdapters.LevelBuilder;
 using Codebase.InterfaceAdapters.Player;
 using Codebase.Utilities;
+using External.Reactive;
 using UniRx;
 using UnityEngine;
 
 namespace Codebase.InterfaceAdapters.Stick
 {
-    public class StickController : DisposableBase
+    public class StickController : DisposableBase, IStick
     {
         private readonly StickViewModel _stickViewModel;
         private readonly IContentProvider _contentProvider;
-        private readonly GameFlowViewModel _gameFlowViewModel;
-        private readonly PlayerViewModel _playerViewModel;
-        private readonly LevelBuilderViewModel _levelBuilderViewModel;
+        private readonly IGameFlow _iGameFlow;
+        private readonly ILevelBuilder _iLevelBuilder;
+        private readonly IPlayer _iPlayer;
         private CompositeDisposable _clickHandlers;
+        
         private readonly List<GameObject> _spawnedSticks = new List<GameObject>();
+        public ReactiveProperty<float> stickLength { get; set; }
+        public ReactiveTrigger stickIsDown { get; set; }
+        public ReactiveTrigger startStickGrow { get; set; }
+        public ReactiveTrigger startStickRotation { get; set; }
 
-        public StickController(IContentProvider contentProvider, StickViewModel stickViewModel, GameFlowViewModel gameFlowViewModel, 
-            PlayerViewModel playerViewModel, LevelBuilderViewModel levelBuilderViewModel)
+        protected StickController(IContentProvider contentProvider, StickViewModel stickViewModel, IGameFlow iGameFlow, 
+            IPlayer iPlayer, ILevelBuilder iLevelBuilder)
         {
+
+            stickLength = new ReactiveProperty<float>();
+            stickIsDown = new ReactiveTrigger();
+            startStickGrow = new ReactiveTrigger();
+            startStickRotation = new ReactiveTrigger();
+            
             _contentProvider = contentProvider;
             _stickViewModel = stickViewModel;
-            _gameFlowViewModel = gameFlowViewModel;
-            _playerViewModel = playerViewModel;
-            _levelBuilderViewModel = levelBuilderViewModel;
-            _gameFlowViewModel.levelFlowState.Subscribe(x =>
+            _iGameFlow = iGameFlow;
+            _iPlayer = iPlayer;
+            _iLevelBuilder = iLevelBuilder;
+
+            _stickViewModel.levelFlowState = _iGameFlow.levelFlowState;
+            
+            _iGameFlow.levelFlowState.Subscribe(x =>
             {
                 if (x == LevelFlowState.PlayerIdle) TmpClickDownSubscription();
             }).AddTo(_disposables);
 
-            _gameFlowViewModel.startLevel.Subscribe(DestroySticks).AddTo(_disposables);
+            _iGameFlow.startLevel.Subscribe(DestroySticks).AddTo(_disposables);
             _stickViewModel.stickIsDown.Subscribe(
                 () =>
-                _gameFlowViewModel.changeLevelFlowState.Notify(LevelFlowState.PlayerRun))
+                    _iGameFlow.changeLevelFlowState.Notify(LevelFlowState.PlayerRun))
                 .AddTo(_disposables);
-            _playerViewModel.columnIsReachable.Subscribe(x =>
+            
+            _iPlayer.columnIsReachable.Subscribe(x =>
             {
                 if (x)
                     RemoveOneView();
@@ -47,9 +63,9 @@ namespace Codebase.InterfaceAdapters.Stick
         private void CreateView()
         {
             var view = Object.Instantiate(_contentProvider.StickView(),
-                new Vector2(_levelBuilderViewModel.actualColumnXPosition.Value + 1, Constant.PlayerYPosition - 0.5f),
+                new Vector2(_iLevelBuilder.actualColumnXPosition + 1, Constant.PlayerYPosition - 0.5f),
                 Quaternion.identity);
-            view.Init(_stickViewModel, _gameFlowViewModel);
+            view.Init(_stickViewModel);
             _spawnedSticks.Add(view.gameObject);
         }
 
@@ -81,13 +97,13 @@ namespace Codebase.InterfaceAdapters.Stick
 
         private void GrowStickUp()
         {
-            _gameFlowViewModel.changeLevelFlowState.Notify(LevelFlowState.StickGrowsUp);
+            _iGameFlow.changeLevelFlowState.Notify(LevelFlowState.StickGrowsUp);
             _stickViewModel.startStickGrow.Notify();
         }
         
         private void RotateStick()
         {
-            _gameFlowViewModel.changeLevelFlowState.Notify(LevelFlowState.StickFalls);
+            _iGameFlow.changeLevelFlowState.Notify(LevelFlowState.StickFalls);
             _stickViewModel.startStickRotation.Notify();
         }
         
@@ -103,5 +119,6 @@ namespace Codebase.InterfaceAdapters.Stick
             Object.Destroy(_spawnedSticks[0].gameObject);
             _spawnedSticks.RemoveAt(0);
         }
+        
     }
 }

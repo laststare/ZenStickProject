@@ -11,24 +11,21 @@ namespace Codebase.Views
     public class ScoreCounterView : ViewBase
     {
         private ScoreCounterViewModel _scoreCounterViewModel;
-        private GameFlowViewModel _gameFlowViewModel;
-        private MainMenuViewModel _mainMenuViewModel;
+        private IGameFlow _iGameFlow;
         [SerializeField] private TMP_Text bestScoreText, actualScoreText;
 
-        public void Init(ScoreCounterViewModel scoreCounterViewModel, GameFlowViewModel gameFlowViewModel, MainMenuViewModel mainMenuViewModel)
+        public void Init(ScoreCounterViewModel scoreCounterViewModel)
         {
             _scoreCounterViewModel = scoreCounterViewModel;
-            _gameFlowViewModel = gameFlowViewModel;
-            _mainMenuViewModel = mainMenuViewModel;
             _scoreCounterViewModel.showScore.SubscribeWithSkip(ShowScore).AddTo(this);
-            _mainMenuViewModel.showStartMenu.Subscribe(() =>
+            _scoreCounterViewModel.showStartMenu.Subscribe(() =>
             {
                 HideAll();
                 ShowStart();
             }).AddTo(this);
-            _gameFlowViewModel.startGame.Subscribe(ShowStart).AddTo(this);
-            _gameFlowViewModel .startLevel.Subscribe(HideAll).AddTo(this);
-            _gameFlowViewModel.finishLevel.Subscribe(ShowFinish).AddTo(this);
+            _iGameFlow.startGame.Subscribe(ShowStart).AddTo(this);
+            _iGameFlow.startLevel.Subscribe(HideAll).AddTo(this);
+            _iGameFlow.finishLevel.Subscribe(ShowFinish).AddTo(this);
 
         }
 

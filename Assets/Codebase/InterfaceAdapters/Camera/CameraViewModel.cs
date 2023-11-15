@@ -7,5 +7,6 @@ namespace Codebase.InterfaceAdapters.Camera
     {
         public ReactiveEvent<float> moveCameraToNextColumn = new();
         public ReactiveTrigger cameraFinishMoving = new();
+        public ReactiveTrigger startLevel { get; set; }
     }
 }

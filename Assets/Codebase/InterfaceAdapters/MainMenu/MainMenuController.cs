@@ -2,25 +2,33 @@
 using Codebase.InterfaceAdapters.GameFlow;
 using Codebase.Utilities;
 using Codebase.Views;
+using External.Reactive;
 using UniRx;
 using UnityEngine;
 
 namespace Codebase.InterfaceAdapters.MainMenu
 {
-    public class MainMenuController : DisposableBase
+    public class MainMenuController : DisposableBase , IMainMenu
     {
         private readonly IContentProvider _contentProvider;
         private readonly Transform _uiRoot;
         private readonly MainMenuViewModel _mainMenuViewModel;
-        private readonly GameFlowViewModel _gameFlowViewModel;
+        private readonly IGameFlow _iGameFlow;
         private MainMenuView _view;
-        
-        public MainMenuController(IContentProvider contentProvider, Transform uiRoot, MainMenuViewModel mainMenuViewModel, GameFlowViewModel gameFlowViewModel)
+        public ReactiveTrigger showStartMenu { get; set; }
+
+        protected MainMenuController(IContentProvider contentProvider, Transform uiRoot, IGameFlow iGameFlow, MainMenuViewModel mainMenuViewModel)
         {
+            showStartMenu = new ReactiveTrigger();
             _contentProvider = contentProvider;
             _uiRoot = uiRoot;
+
             _mainMenuViewModel = mainMenuViewModel;
-            _gameFlowViewModel = gameFlowViewModel;
+            _mainMenuViewModel.startLevel = iGameFlow.startLevel;
+            _mainMenuViewModel.finishLevel = iGameFlow.finishLevel;
+            _mainMenuViewModel.startGame = iGameFlow.startGame;
+            
+            _iGameFlow = iGameFlow;
             _mainMenuViewModel.menuButtonClicked.SubscribeWithSkip(ButtonClickReceiver).AddTo(_disposables);
             CrateView();
         }
@@ -28,7 +36,7 @@ namespace Codebase.InterfaceAdapters.MainMenu
         private void CrateView()
         {
             _view = Object.Instantiate(_contentProvider.MainMenuView(), _uiRoot);
-            _view.Init(_mainMenuViewModel, _gameFlowViewModel);
+            _view.Init(_mainMenuViewModel);
         }
         
         private void ButtonClickReceiver(MainMenuButton button)
@@ -42,7 +50,7 @@ namespace Codebase.InterfaceAdapters.MainMenu
                     StartLevel();
                     break;
                 case MainMenuButton.BackToStartScreen:
-                    _mainMenuViewModel.showStartMenu.Notify();
+                    showStartMenu.Notify();
                     break;
             }
         }
@@ -50,7 +58,9 @@ namespace Codebase.InterfaceAdapters.MainMenu
         private void StartLevel()
         {
             Debug.Log("level started");
-            _gameFlowViewModel.startLevel.Notify();
+            _iGameFlow.startLevel.Notify();
         }
+
+     
     }
 }

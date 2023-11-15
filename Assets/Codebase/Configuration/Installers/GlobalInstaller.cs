@@ -2,6 +2,7 @@ using Codebase.Data;
 using Codebase.InterfaceAdapters.DataSave;
 using Codebase.InterfaceAdapters.LevelBuilder;
 using Codebase.InterfaceAdapters.MainMenu;
+using Codebase.InterfaceAdapters.Player;
 using UnityEngine;
 using Zenject;
 
@@ -28,9 +29,7 @@ namespace Codebase.Configuration.Installers
         
         private void InjectLevelBuilder()
         {
-            Container.Bind<LevelBuilderViewModel>()
-                .AsSingle();
-            
+
             Container.BindInterfacesAndSelfTo<LevelBuilderController>()
                 .AsSingle()
                 .NonLazy();
@@ -52,6 +51,7 @@ namespace Codebase.Configuration.Installers
                 .AsSingle()
                 .NonLazy();
         }
+        
         
     }
 }
