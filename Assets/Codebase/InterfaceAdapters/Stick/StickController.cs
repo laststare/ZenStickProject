@@ -43,10 +43,10 @@ namespace Codebase.InterfaceAdapters.Stick
 
         private void CreateView()
         {
-            var view = Object.Instantiate(_contentProvider.Stick(),
+            var stick = Object.Instantiate(_contentProvider.Stick(),
                 new Vector2(_iLevelBuilder.ActualColumnXPosition + 1, Constant.PlayerYPosition - 0.5f),
                 Quaternion.identity);
-            _spawnedSticks.Add(view.gameObject);
+            _spawnedSticks.Add(stick.gameObject);
         }
         
         private void TmpClickDownSubscription()

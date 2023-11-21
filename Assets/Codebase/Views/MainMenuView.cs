@@ -10,6 +10,7 @@ namespace Codebase.Views
     public class MainMenuView : ViewBase
     {
         [SerializeField] private Button startGameBtn, restartGameBtn, backStartScreenBtn;
+        [SerializeField] private GameObject gameTitle;
         
         public void Init(MainMenuViewModel mainMenuViewModel, IGameFlow iGameFlow)
         {
@@ -43,6 +44,7 @@ namespace Codebase.Views
         private void ShowStartScreen()
         {
             startGameBtn.gameObject.SetActive(true);
+            gameTitle.SetActive(true);
             HideFinishScreen();
         }
 
@@ -51,8 +53,12 @@ namespace Codebase.Views
             restartGameBtn.gameObject.SetActive(true); 
             backStartScreenBtn.gameObject.SetActive(true);
         }
-        
-        private void HideStartScreen() => startGameBtn.gameObject.SetActive(false);
+
+        private void HideStartScreen()
+        {
+            gameTitle.SetActive(false);
+            startGameBtn.gameObject.SetActive(false);
+        }
 
         private void HideFinishScreen()
         {
