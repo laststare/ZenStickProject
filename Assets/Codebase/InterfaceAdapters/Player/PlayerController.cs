@@ -46,7 +46,7 @@ namespace Codebase.InterfaceAdapters.Player
         
         private void SetPlayerDestinationPoint()
         {
-            var moveDistance = _iLevelBuilder.ActualColumnXPosition + 1 +  _iStick.StickLength.Value;
+            var moveDistance = _iLevelBuilder.ActualColumnXPosition + 1 +  _iStick.StickLength;
             _iGameFlow.ColumnIsReachable.SetValueAndForceNotify(moveDistance >= _iLevelBuilder.NextColumnXPosition - 1.25f &&
                                                                 moveDistance <= _iLevelBuilder.NextColumnXPosition + 1.25f);
             var playerDestination = _iGameFlow.ColumnIsReachable.Value

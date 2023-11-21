@@ -58,9 +58,6 @@ namespace Codebase.Configuration.Installers
         
         private void InjectStick()
         {
-            Container.Bind<StickViewModel>()
-                .AsSingle();
-            
             Container.BindInterfacesAndSelfTo<StickController>()
                 .AsSingle()
                 .NonLazy();

@@ -3,6 +3,8 @@ using Codebase.Data;
 using Codebase.InterfaceAdapters.GameFlow;
 using Codebase.InterfaceAdapters.LevelBuilder;
 using Codebase.Utilities;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using UniRx;
 using UnityEngine;
 
@@ -10,21 +12,17 @@ namespace Codebase.InterfaceAdapters.Stick
 {
     public class StickController : DisposableBase, IStick
     {
-        private readonly StickViewModel _stickViewModel;
         private readonly IContentProvider _contentProvider;
         private readonly IGameFlow _iGameFlow;
         private readonly ILevelBuilder _iLevelBuilder;
         private CompositeDisposable _clickHandlers;
         
         private readonly List<GameObject> _spawnedSticks = new List<GameObject>();
-        public ReactiveProperty<float> StickLength { get; set; }
+        public float StickLength { get; set; }
 
-        protected StickController(IContentProvider contentProvider, StickViewModel stickViewModel, 
-            IGameFlow iGameFlow, ILevelBuilder iLevelBuilder)
+        protected StickController(IContentProvider contentProvider, IGameFlow iGameFlow, ILevelBuilder iLevelBuilder)
         {
-            StickLength = new ReactiveProperty<float>();
             _contentProvider = contentProvider;
-            _stickViewModel = stickViewModel;
             _iGameFlow = iGameFlow;
             _iLevelBuilder = iLevelBuilder;
             
@@ -34,11 +32,6 @@ namespace Codebase.InterfaceAdapters.Stick
             }).AddTo(_disposables);
 
             _iGameFlow.StartLevel.Subscribe(DestroySticks).AddTo(_disposables);
-            
-            _stickViewModel.StickIsDown.Subscribe(
-                () =>
-                    _iGameFlow.ChangeLevelFlowState.Notify(LevelFlowState.PlayerRun))
-                .AddTo(_disposables);
             
             _iGameFlow.ColumnIsReachable.Subscribe(x =>
             {
@@ -50,10 +43,9 @@ namespace Codebase.InterfaceAdapters.Stick
 
         private void CreateView()
         {
-            var view = Object.Instantiate(_contentProvider.StickView(),
+            var view = Object.Instantiate(_contentProvider.Stick(),
                 new Vector2(_iLevelBuilder.ActualColumnXPosition + 1, Constant.PlayerYPosition - 0.5f),
                 Quaternion.identity);
-            view.Init(_stickViewModel, _iGameFlow, this);
             _spawnedSticks.Add(view.gameObject);
         }
         
@@ -82,16 +74,28 @@ namespace Codebase.InterfaceAdapters.Stick
                 .AddTo(_clickHandlers); 
         }
 
-        private void GrowStickUp()
+        private async void GrowStickUp()
         {
             _iGameFlow.ChangeLevelFlowState.Notify(LevelFlowState.StickGrowsUp);
-            _stickViewModel.StartStickGrow.Notify();
+            var stick = _spawnedSticks[^1];
+            var stickHeight = 0f;
+            var stickWidth = stick.transform.localScale.x;
+            while (_iGameFlow.LevelFlowState.Value == LevelFlowState.StickGrowsUp)
+            {
+                stickHeight += Time.deltaTime * 6;
+                stick.transform.localScale = new Vector3(stickWidth, stickHeight, 1);
+                await UniTask.Yield();
+            }
+            StickLength = stickHeight;
         }
         private void RotateStick()
         {
             _iGameFlow.ChangeLevelFlowState.Notify(LevelFlowState.StickFalls);
-            _stickViewModel.StartStickRotation.Notify();
+            var stick = _spawnedSticks[^1];
+            stick.transform.DORotate(new Vector3(0, 0, -90f), 0.5f)
+                .OnComplete(() => _iGameFlow.ChangeLevelFlowState.Notify(LevelFlowState.PlayerRun));
         }
+        
         private void DestroySticks()
         {
             foreach (var stick in _spawnedSticks) 

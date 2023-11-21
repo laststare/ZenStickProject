@@ -10,7 +10,7 @@ namespace Codebase.Data
         public GameObject LevelColumn();
         public CameraView CameraView();
         public PlayerView PlayerView();
-        public StickView StickView();
+        public Transform Stick();
         public RewardView RewardView();
         public RewardConfig RewardConfig();
     }
