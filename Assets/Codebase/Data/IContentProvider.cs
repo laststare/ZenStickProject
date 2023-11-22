@@ -13,5 +13,6 @@ namespace Codebase.Data
         public Transform Stick();
         public RewardView RewardView();
         public RewardConfig RewardConfig();
+        public LevelConfig LevelConfig();
     }
 }

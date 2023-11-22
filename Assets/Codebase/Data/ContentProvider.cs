@@ -39,6 +39,7 @@ namespace Codebase.Data
         public class SettingsContent
         {
             public RewardConfig rewardConfig;
+            public LevelConfig levelConfig;
         }
         
         public MainMenuView MainMenuView() => UIViews.mainMenuView;
@@ -49,6 +50,6 @@ namespace Codebase.Data
         public Transform Stick()  => Views.stick;
         public RewardView RewardView()  => Views.rewardView;
         public RewardConfig RewardConfig()  => Settings.rewardConfig;
-        
+        public LevelConfig LevelConfig() => Settings.levelConfig;
     }
 }
