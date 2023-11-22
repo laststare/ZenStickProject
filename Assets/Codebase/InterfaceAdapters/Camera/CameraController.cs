@@ -2,7 +2,7 @@
 using Codebase.InterfaceAdapters.GameFlow;
 using Codebase.InterfaceAdapters.LevelBuilder;
 using Codebase.Utilities;
-using Codebase.Views;
+using DG.Tweening;
 using UniRx;
 using UnityEngine;
 
@@ -13,41 +13,44 @@ namespace Codebase.InterfaceAdapters.Camera
         private readonly IContentProvider _contentProvider;
         private readonly IGameFlow _iGameFlow;
         private readonly ILevelBuilder _iLevelBuilder;
-        private readonly CameraViewModel _cameraViewModel;
-        private CameraView _view;
+        private readonly Transform _camera;
         
-        public CameraController(IContentProvider contentProvider, CameraViewModel cameraViewModel,
-            IGameFlow iGameFlow, ILevelBuilder iLevelBuilder)
+        public CameraController(IContentProvider contentProvider, IGameFlow iGameFlow, ILevelBuilder iLevelBuilder)
         {
             _contentProvider = contentProvider;
-            _cameraViewModel = cameraViewModel;
             _iGameFlow = iGameFlow;
             _iLevelBuilder = iLevelBuilder;
+            
+            _camera = Object.Instantiate(_contentProvider.Camera());
             
             _iGameFlow.LevelFlowState.Subscribe(x =>
             {
                 if (x == LevelFlowState.CameraRun)
-                    SetCameraDestinationPointToColumn();
+                {
+                    var cameraPosition = _iLevelBuilder.ActualColumnXPosition + _contentProvider.LevelConfig().GetCameraColumnXOffset;
+                    _camera.DOMoveX(cameraPosition, 1).OnComplete(() =>
+                    {
+                        _iGameFlow.ChangeLevelFlowState.Notify(LevelFlowState.PlayerIdle);
+                    });
+                }
             }).AddTo(_disposables);
-            
-            _cameraViewModel.CameraFinishMoving.Subscribe(() =>
+
+            _iGameFlow.StartLevel.Subscribe(() =>
             {
-                _iGameFlow.ChangeLevelFlowState.Notify(LevelFlowState.PlayerIdle);
+                _camera.position = new Vector3(_contentProvider.LevelConfig().GetCameraColumnXOffset, _camera.position.y,
+                    _camera.position.z);
             }).AddTo(_disposables);
-            CreateCameraView();
         }
         
-        private void CreateCameraView()
+        protected override void OnDispose()
         {
-            _view = Object.Instantiate(_contentProvider.CameraView());
-            _view.Init(_cameraViewModel, _iGameFlow);
+            base.OnDispose();
+
+            if (_camera != null)
+            {
+                Object.Destroy(_camera.gameObject);
+            }
         }
-        
-        private void SetCameraDestinationPointToColumn()
-        {
-            _cameraViewModel.MoveCameraToNextColumn.Notify(
-                _iLevelBuilder.ActualColumnXPosition + Constant.CameraOnColumnXOffset);
-        }
-        
+
     }
 }

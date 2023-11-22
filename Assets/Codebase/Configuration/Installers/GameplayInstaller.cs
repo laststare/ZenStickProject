@@ -27,9 +27,6 @@ namespace Codebase.Configuration.Installers
 
         private void InjectCamera()
         {
-            Container.Bind<CameraViewModel>()
-                .AsSingle();
-            
             Container.BindInterfacesAndSelfTo<CameraController>()
                 .AsSingle()
                 .NonLazy();
@@ -47,13 +44,9 @@ namespace Codebase.Configuration.Installers
         
         private void InjectPlayer()
         {
-            Container.Bind<PlayerViewModel>()
-                .AsSingle();
-            
             Container.Bind<PlayerController>()
                 .AsSingle()
                 .NonLazy();
-            
         }
         
         private void InjectStick()

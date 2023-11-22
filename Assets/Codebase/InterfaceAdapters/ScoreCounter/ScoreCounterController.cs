@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
-using Codebase.Data;
+﻿using Codebase.Data;
 using Codebase.InterfaceAdapters.DataSave;
 using Codebase.InterfaceAdapters.GameFlow;
 using Codebase.InterfaceAdapters.LevelBuilder;
 using Codebase.InterfaceAdapters.MainMenu;
 using Codebase.Utilities;
 using Codebase.Views;
+using DG.Tweening;
+using TMPro;
 using UniRx;
 using UnityEngine;
 
@@ -23,7 +24,7 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
         
         private ScoreCounterView _view;
         private int _currentScore, _bestScore;
-        private readonly List<RewardView> _spawnedRewardViews = new();
+        private readonly float _playerYPosition;
 
         public ScoreCounterController(IContentProvider contentProvider, IDataSave dataSave, Transform uiRoot, ScoreCounterViewModel scoreCounterViewModel, 
             IGameFlow iGameFlow, ILevelBuilder iLevelBuilder, IMainMenu iMainMenu)
@@ -35,6 +36,8 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
             _iGameFlow = iGameFlow;
             _iLevelBuilder = iLevelBuilder;
             _iMainMenu = iMainMenu;
+            _playerYPosition = _contentProvider.LevelConfig().GetPlayerYPosition;
+            
             _iGameFlow.StartGame.Subscribe(GetSavedScore).AddTo(_disposables);
             
             _iGameFlow.FinishLevel.Subscribe(() =>
@@ -42,17 +45,13 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
                 UpdateBestScore();
                 SendScoreToView();
                 ClearScore();
-                DestroyRewardView();
             }).AddTo(_disposables);
             
             _iGameFlow.ColumnIsReachable.Subscribe(x =>
             {
                 if (!x) return;
                 UpdateScore();
-                RemoveOneView();
             }).AddTo(_disposables);
-            _scoreCounterViewModel.SpawnRewardView.Subscribe(CreateRewardView).AddTo(_disposables);
-            
             CreateView();
         }
 
@@ -61,33 +60,31 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
             _view = Object.Instantiate(_contentProvider.ScoreCounterView(), _uiRoot);
             _view.Init(_scoreCounterViewModel, _iGameFlow, _iMainMenu);
         }
-        
-        private void CreateRewardView()
-        {
-            var rewardView = Object.Instantiate(_contentProvider.RewardView(),
-                new Vector3(_iLevelBuilder.NextColumnXPosition, Constant.PlayerYPosition, 0), Quaternion.identity);
-            _spawnedRewardViews.Add(rewardView);
-        }
-        
         private void GetSavedScore()
         {
             _bestScore = _dataSave.LoadBestScore();
             SendScoreToView();
         }
-
         private void SendScoreToView()
         {
             var bestText = $"Best score: {_bestScore}";
             var actualText =  $"Your score: {_currentScore}";
             _scoreCounterViewModel.ShowScore.Notify(bestText, actualText);
         }
-
         private void UpdateScore()
         {
             _currentScore += _contentProvider.RewardConfig().OneColumnReward;
             _scoreCounterViewModel.SpawnRewardView.Notify();
+            SpawnRewardItem();
         }
-
+        private void SpawnRewardItem()
+        {
+            var reward = Object.Instantiate(_contentProvider.Reward(),
+                new Vector3(_iLevelBuilder.NextColumnXPosition, _playerYPosition, 0), Quaternion.identity);
+            reward.DOMoveY(reward.position.y + 3, 2);
+            var rewardText = reward.transform.GetChild(0).GetComponent<TMP_Text>();
+            rewardText.DOFade(0, 2).OnComplete(() => { Object.Destroy(reward.gameObject);});
+        }
         private void UpdateBestScore()
         {
             if (_currentScore <= _bestScore)
@@ -95,22 +92,7 @@ namespace Codebase.InterfaceAdapters.ScoreCounter
             _bestScore = _currentScore;
             _dataSave.SaveBestScore(_bestScore);
         }
-
-        private void DestroyRewardView()
-        {
-            foreach (var view in _spawnedRewardViews) 
-                Object.Destroy(view.gameObject);
-            _spawnedRewardViews.Clear();
-        }
-
         private void ClearScore() => _currentScore = 0;
 
-        private void RemoveOneView()
-        {
-            if (_spawnedRewardViews.Count <= 2) return;
-            Object.Destroy(_spawnedRewardViews[0].gameObject);
-            _spawnedRewardViews.RemoveAt(0);
-        }
-   
     }
 }

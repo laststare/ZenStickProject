@@ -14,5 +14,9 @@ namespace Codebase.Utilities
                 disposable.Dispose();
             }
         }
+        
+        protected virtual void OnDispose()
+        {
+        }
     }
 }
