@@ -44,7 +44,7 @@ namespace Codebase.InterfaceAdapters.Stick
         private void CreateView()
         {
             var stick = Object.Instantiate(_contentProvider.Stick(),
-                new Vector2(_iLevelBuilder.ActualColumnXPosition + 1, Constant.PlayerYPosition - 0.5f),
+                new Vector2(_iLevelBuilder.ActualColumnXPosition + 1, _contentProvider.LevelConfig().GetPlayerYPosition - 0.5f),
                 Quaternion.identity);
             _spawnedSticks.Add(stick.gameObject);
         }
